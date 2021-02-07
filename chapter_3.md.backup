@@ -1,0 +1,223 @@
+# Chapter 3 - Bare bones
+Okay now onto coding. First we'll take care of two config files so open up `/application/config/config.php` and put in some defaults (this file usually holds a whole bunch of stuff like language, timezone, db settings and more, but for now we will just add what we will need in this lesson):
+
+```php
+<?php
+
+define('TITLE', 'mvc from scratch');
+define('ENVIRONMENT', 'dev'); //"dev" will will show errors, "prod" hides them
+define('LAYOUT', 'default'); //in /public/layouts/
+define('ROOT_URI_PATH', '/'); //or, if you are on xampp, name of the project folder in htdocs
+
+//WEB STRUCTURE
+define('URL_PROTOCOL', '//'); //protocol independent (as opposed of explicitly setting http/https)
+define('URL_DOMAIN', $_SERVER['HTTP_HOST']);
+define('URL', URL_PROTOCOL . URL_DOMAIN);
+
+//FOLDER STRUCTURE
+define('PUBLIC_PATH', ROOT_PATH . 'public/');
+define('VIEW_PATH', PUBLIC_PATH . 'public/views/');	
+```
+
+Then do the same thing for the routes in `/application/config/routes.php`. Routes.php is just an array that holds list of open routes and their info (so that router knows which action of what controller to call when the route is triggered).
+
+```php
+<?php
+
+return []; //let's just leave it empty for now
+```
+ 
+For now that should be enough, but over the course of the tutorial we will add more things to it. So now that we've set up defaults, we can start working on the core of our system. Let's open the `/application/core/View.php` first.
+
+View.php is a simple class whose only mission is to render a HTML by combining web template from `/public` and variables from model object(s) that were passed to it by controller. The following lines should be enough so you can put them in the file.
+
+```php
+<?php
+
+namespace application\core;
+
+
+class View 
+{
+
+	public $path;
+	public $route;
+	public $layout;
+
+	public function __construct($route, $layout=LAYOUT) 
+	{
+		$this->route = $route;
+		$this->layout = $layout;
+		
+		// this part is just a convention.. it means that views will
+		// always be named like /public/views/controllerName/actionName.php
+		// so that it will be easier to find them, but change it if you want
+		$this->path = $route['controller'].'/'.$route['action'];
+	}
+
+	// Main render method that merges layout with the view so only
+	// thing that changes is the content part of the website (we don't
+	// need to code navigation footer and rest of the static elements 
+	// for every view)
+	public function render($title = TITLE, $vars = []) 
+	{
+		extract($vars); //data passed by controller
+		$path = VIEW_PATH . $this->path. '.php';
+		if (file_exists($path)) { 
+			ob_start();
+			require $path;
+			$content = ob_get_clean();
+			require PUBLIC_PATH . '/layouts/'.$this->layout.'.php';
+		}
+	}
+
+	// Method for rendering error pages as they should usually only
+	// show error message/code, we do not need to fetch a main layout 
+	// for them
+	public static function errorCode($code) 
+	{
+		http_response_code($code);
+		$path = PUBLIC_PATH . '/errors/'.$code.'.php';
+		if (file_exists($path)) {
+			require $path;
+		}
+		exit;
+	}
+
+	// Simple redirect method
+    public function redirect($url)
+    {
+        header('location: '.$url);
+        exit;
+    }
+}
+``` 
+
+Now that the View class is done, we will move on to the next core class which is router. This class will take the url that user had searched for and check if it matches with one of the routes from our config folder. If the match is found router will trigger the corresponding controller, and if it's not it will render an error. So let's get to it, open the `/application/core/Router.php` and write:
+
+```php
+<?php
+
+namespace application\core;
+
+
+use View; //we will need it to render errors (if there are any)
+
+class Router 
+{
+
+    protected $routes = [];
+    protected $params = [];
+    
+    public function __construct() 
+    {
+        $arr = require 'application/config/routes.php';
+        foreach ($arr as $key => $val) {
+            $this->add($key, $val);
+        }
+    }
+
+    public function add($route, $params) 
+    {
+        $route = parse_url($route, PHP_URL_PATH);	
+        $route = '#^'.$route.'$#';
+        $this->routes[$route] = $params;
+    }
+
+	//this is not a very secure way to do this but later on in
+	//the tutorial, when we start talking about security, we will 
+	//return here to patch it
+    public function match() 
+    {
+        $url = parse_url(trim($_SERVER['REQUEST_URI'], ROOT_URI_PATH), PHP_URL_PATH);
+
+        foreach ($this->routes as $route => $params) {
+            if (preg_match($route, $url, $matches)) {
+                $this->params = $params;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function run()
+    {
+        if ($this->match()) {
+            $path = 'application\controllers\\'.ucfirst($this->params['controller']).'Controller';
+            if (class_exists($path)) {
+                $action = $this->params['action'].'Action';
+                if (method_exists($path, $action)) {
+                    $controller = new $path($this->params);
+                    $controller->$action();
+                } else {
+                    View::errorCode(400); //both match and controller are found, but there is no action with that name, return 400
+                }
+            } else {
+                View::errorCode(500); //match is found, but there is no controller, return 500
+            }
+        } else {
+            View::errorCode(404); //no match found, return 404
+        }
+    }
+
+}
+```
+
+
+We are almost done with the core, so let's open the `/application/core/Controller.php`. We don't wanna too much code in here. In fact, rule of thumb is that all business logic should be placed in models, and controllers should just point	 which model should be passed to which view. So with that in mind lets create an abstract class for controllers. 
+
+```php
+<?php
+
+namespace application\core;
+
+
+use View;
+
+// We are using abstract class here because this is just
+// a template for controllers. Every section of the webapp 
+// will have it's own controller that will extend this template
+abstract class Controller 
+{
+
+	public $route;
+	public $view;
+
+	public function __construct($route) 
+	{
+		$this->route = $route;
+
+		$this->view = new View($route);
+		
+		//if model is named the same as a controller, 
+		//load it automatically
+		$this->model = $this->loadModel($route['controller']);
+	}
+
+	public function loadModel($name) 
+	{
+		$path = 'application\models\\'.ucfirst($name);
+		if (class_exists($path)) {
+			return new $path;
+		}
+	}
+
+}
+```
+
+When I said that we are almost done with the core functionality I meant it, as the contents for our last file `/application/core/Model.php` are just:
+
+```php
+<?php
+
+namespace application\core;
+
+
+abstract class Model 
+{	
+}
+```
+
+Contents of the model are usually specific to that model, so right now we will leave it empty, but later on, when we add database support into the mix, we can extend it with some common functionalities.
+
+And that is it. In the next section we will create a simple webpage to test if everything is working, then we will move on to extend our framework further.

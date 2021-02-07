@@ -1,0 +1,8 @@
+# Chapter 1 - Intro
+
+If you are planning to land a job as a web developer or if you just want to understand how webapps work so you can hack them, you might wanna know a thing or two about frameworks. Over the course of this tutorial I'll show you how the frameworks are made, why people use use them and how they function. Keep in mind though, that the framework we will build isn't fit for a production purposes, I'm just gonna use it to help you understand them.  
+Onto the main course, in order to follow this tutorial you will need:
+- php 7.x
+- mysql
+- webserver (apache or nginx)
+- editor

@@ -1,0 +1,125 @@
+# Chapter 3.5 - First app
+
+Now that we have the core ready building something. First, let's edit the index.php in the root folder of our project. As a first file server will load we need to make sure it has the instructions to initialize router so that our app can be triggered.
+
+```php
+<?php
+
+use application\core\Router;
+
+define('ROOT_PATH', __DIR__. '/');
+require_once ROOT_PATH . 'application/config/config.php';
+
+//autoload_register will magically load every class that we need
+spl_autoload_register(function($class) {
+    $path = str_replace('\\', '/', $class.'.php');
+    if (file_exists($path)) {
+        require $path;
+    }
+});
+
+if(ENVIRONMENT === 'dev') {
+	//debug flags will go here later on
+}elseif(ENVIRONMENT === 'prod'){
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}else{
+    die('Fatal error: environment not defined or valid!');
+}
+
+$router = new Router;
+$router->run();
+
+```
+
+Now that that's done lets quickly add some basic html template. Open the `/public/templates/default.php` and add
+
+```php
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+	<!-- $content is rendered in view -->
+	<?php echo $content; ?>
+</body>
+</html>
+```
+
+we also need to create view so navigate to `/public/views/` and create folder "main" (which will also be the name of our controller) and in it create file "index.php" (index being the name of the triggered action in that controller) and paste this
+
+```php
+<p>
+	<!-- $data["message"] will be defined in the controller -->
+	<?php echo $data->getMessage(); ?>
+</p>
+```
+
+Okay. Now we are done with the frontend so let's get back to our `/application/config/routes.php` and add a new route:
+
+```php
+<?php
+
+return [
+	
+	// this will match if user navigates to 
+	// www.ourwebsite.com/home/page
+	'home/page' => [
+		'controller' => 'main', 
+		'action' => 'index',
+	],
+
+];
+``` 
+
+Now lets create a model for our page. Create folder "models" inside `/application/` directory and create Main.php inside it, then open it and write something like this:
+
+```php
+<?php
+
+namespace application\models;
+
+
+use application\core\Model;
+
+class Main extends Model //we are extending the model defined in core
+{
+	public function getMessage()
+	{
+
+        return "My message";
+    }
+}
+```
+
+Great, now we have something to return to view. Now we only need to make a controller that will put it all together. Create folder "controllers" in `/application/` and inside it create the file "MainController.php"
+
+```php
+<?php
+
+namespace application\controllers;
+
+
+use application\core\Controller;
+
+class MainController extends Controller {
+
+	public function indexAction() {
+		//if model is named like the controller we don't have to
+		//explicitly call it
+
+		$vars = [
+			'data' => $this->model->get
+		];
+
+		$this->view->render(TITLE, $vars);
+	}
+
+}
+```
+
+Now when you navigate your browser to "ourwebapp.com/home/page" we are greeted wtih the fallowing screen:
+
+![Screenshot](https://imgur.com/JAuapCU.png)
+
+And there you have it. Our first app creted with this framework. Next we will talk about security and error handling, add a database support then make another webapp that is more in line with what would you think when you

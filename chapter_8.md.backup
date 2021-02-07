@@ -1,0 +1,49 @@
+# Chapter 8 - Recap
+
+We will use this chapter as a breather - to look back on what we have done and to talk about things we will do next.  
+If you have followed a tutorial until now, you folder structure probably looks somewhat like this:
+
+```
+root/
+	index.php
+	application/
+		config/
+			config.php
+			routes.php
+		controllers/
+			MainController.php
+		core/
+			Controller.php
+			Middleware.php
+			Model.php
+			Router.php
+			View.php
+		helpers/
+			Cookies.php
+			CSRF.php
+			DB.php
+			Request.php
+			SecureSession.php
+			Validation.php
+		middleware/
+			Persister.php
+		models/
+			Main.php
+		storage/
+			sessions/
+	public/
+		components/
+		errors/
+			400.php
+			404.php
+			500.php
+		layouts/
+			default.php
+		views/
+			main/
+				index.php
+```
+
+We started somewhat slow, with just the bare bones of the framework, but over the course of the tutorial we were addeing to that and little by little, our framework became more and more.. well, usable. We added db support, tighten our seurity, abstract the system for session and cookies and we even have a validation system.
+
+So the next part of the tutorial will focus on file handling, and localization, and when when we are done with that we are going to build our own templating engine for fasterfrontend developing

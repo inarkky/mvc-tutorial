@@ -1,0 +1,2065 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title></title>
+        
+        <meta name="robots" content="noindex" />
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="favicon.png">
+        
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        
+        <link rel="stylesheet" href="css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Intro</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> Structure</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Bare bones</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> First app</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Basic security</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Cookies and sessions</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Database</a></li><li class="chapter-item expanded "><a href="chapter_8.html"><strong aria-hidden="true">8.</strong> Recap</a></li><li class="chapter-item expanded "><a href="chapter_9.html"><strong aria-hidden="true">9.</strong> File handling</a></li><li class="chapter-item expanded "><a href="chapter_10.html"><strong aria-hidden="true">10.</strong> Localization</a></li><li class="chapter-item expanded "><a href="chapter_11.html"><strong aria-hidden="true">11.</strong> Templating</a></li><li class="chapter-item expanded "><a href="chapter_12.html"><strong aria-hidden="true">12.</strong> Second App</a></li><li class="chapter-item expanded "><a href="chapter_13.html"><strong aria-hidden="true">13.</strong> Emails</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#chapter-1---intro" id="chapter-1---intro">Chapter 1 - Intro</a></h1>
+<p>If you are planning to land a job as a web developer or if you just want to understand how webapps work so you can hack them, you might wanna know a thing or two about frameworks. Over the course of this tutorial I'll show you how the frameworks are made, why people use use them and how they function. Keep in mind though, that the framework we will build, isn't fit for a production purposes, I'm just gonna use it to help you understand them.<br />
+Onto the main course, in order to follow this tutorial you will need:</p>
+<ul>
+<li>php 7.x</li>
+<li>mysql</li>
+<li>webserver (apache or nginx)</li>
+<li>editor</li>
+</ul>
+<h1><a class="header" href="#chapter-2---structure" id="chapter-2---structure">Chapter 2 - Structure</a></h1>
+<p>I will assume that you have testing environment set up (nginx/apache and database) and running. So the first thing we need to is to separate logic part of the framework from the html part. To do so, we will create two folders in the root directory of the project. It will look something like this:</p>
+<pre><code>root/
+	index.php 
+	application/ #logic goes here
+	public/	#design goes here
+</code></pre>
+<p>MVC stands for Model-View-Controller 	which tells us how the backend distributes tasks. Let's take a look at what it looks like in practice.</p>
+<pre><code>1. user navigates browser to somewebsite.com/forum/introductions
+2. router on ourwebsite.com recognizes the route /forum/introductions as one of it's own that happens to be governed by forum controller
+3. router calls forum controller and passes the parameters (in this case introductions)
+4. controller creates the model Introductions (which contains list of all introductory threads) and passes it to a view for a user to see 
+</code></pre>
+<p>So from this example we can conclude that the core part of the framework consists of 4 parts (router, controller, model and view) so let's create them. Oh yeah, we will need two more files; one that contains a list of routes and another, let's call it config file, to store defaults.<br />
+Now lets add something to the <code>public/</code> folder so we could actually see something when we test it. Actually let's structure it as well so we will have an easier time customizing it later. After all that our structure should look like this:</p>
+<pre><code>root/
+	index.php
+	application/
+		config/
+			config.php
+			routes.php
+		core/
+			Controller.php
+			Model.php
+			Router.php
+			View.php
+	public/
+		components/
+		errors/
+			404.php
+			500.php
+		layouts/
+			default.php
+		views/
+</code></pre>
+<p>Now we are finally ready to do some coding.</p>
+<h1><a class="header" href="#chapter-3---bare-bones" id="chapter-3---bare-bones">Chapter 3 - Bare bones</a></h1>
+<p>Okay now onto coding. First we'll take care of two config files so open up <code>/application/config/config.php</code> and put in some defaults (this file usually holds a whole bunch of stuff like language, timezone, db settings and more, but for now we will just add what we will need in this lesson):</p>
+<pre><code class="language-php">&lt;?php
+
+define('TITLE', 'mvc from scratch');
+define('ENVIRONMENT', 'dev'); //&quot;dev&quot; will will show errors, &quot;prod&quot; hides them
+define('LAYOUT', 'default'); //in /public/layouts/
+define('ROOT_URI_PATH', '/'); //or, if you are on xampp, name of the project folder in htdocs
+
+//WEB STRUCTURE
+define('URL_PROTOCOL', '//'); //protocol independent (as opposed of explicitly setting http/https)
+define('URL_DOMAIN', $_SERVER['HTTP_HOST']);
+define('URL', URL_PROTOCOL . URL_DOMAIN);
+
+//FOLDER STRUCTURE
+define('PUBLIC_PATH', ROOT_PATH . 'public/');
+define('VIEW_PATH', PUBLIC_PATH . 'public/views/');	
+</code></pre>
+<p>Then do the same thing for the routes in <code>/application/config/routes.php</code>. Routes.php is just an array that holds list of open routes and their info (so that router knows which action of what controller to call when the route is triggered).</p>
+<pre><code class="language-php">&lt;?php
+
+return []; //let's just leave it empty for now
+</code></pre>
+<p>For now that should be enough, but over the course of the tutorial we will add more things to it. So now that we've set up defaults, we can start working on the core of our system. Let's open the <code>/application/core/View.php</code> first.</p>
+<p>View.php is a simple class whose only mission is to render a HTML by combining web template from <code>/public</code> and variables from model object(s) that were passed to it by controller. The following lines should be enough so you can put them in the file.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+class View 
+{
+
+	public $path;
+	public $route;
+	public $layout;
+
+	public function __construct($route, $layout=LAYOUT) 
+	{
+		$this-&gt;route = $route;
+		$this-&gt;layout = $layout;
+		
+		// this part is just a convention.. it means that views will
+		// always be named like /public/views/controllerName/actionName.php
+		// so that it will be easier to find them, but change it if you want
+		$this-&gt;path = $route['controller'].'/'.$route['action'];
+	}
+
+	// Main render method that merges layout with the view so only
+	// thing that changes is the content part of the website (we don't
+	// need to code navigation footer and rest of the static elements 
+	// for every view)
+	public function render($vars = []) 
+	{
+		extract($vars); //data passed by controller
+		$path = VIEW_PATH . $this-&gt;path. '.php';
+		if (file_exists($path)) { 
+			ob_start();
+			require $path;
+			$content = ob_get_clean();
+			require PUBLIC_PATH . '/layouts/'.$this-&gt;layout.'.php';
+		}
+	}
+
+	// Method for rendering error pages as they should usually only
+	// show error message/code, we do not need to fetch a main layout 
+	// for them
+	public static function errorCode($code) 
+	{
+		http_response_code($code);
+		$path = PUBLIC_PATH . '/errors/'.$code.'.php';
+		if (file_exists($path)) {
+			require $path;
+		}
+		exit;
+	}
+
+	// Simple redirect method
+    public function redirect($url)
+    {
+        header('location: '.$url);
+        exit;
+    }
+}
+</code></pre>
+<p>Now that the View class is done, we will move on to the next core class which is router. This class will take the url that user had searched for and check if it matches with one of the routes from our config folder. If the match is found router will trigger the corresponding controller, and if it's not it will render an error. So let's get to it, open the <code>/application/core/Router.php</code> and write:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use View; //we will need it to render errors (if there are any)
+
+class Router 
+{
+
+    protected $routes = [];
+    protected $params = [];
+    
+    public function __construct() 
+    {
+        $arr = require 'application/config/routes.php';
+        foreach ($arr as $key =&gt; $val) {
+            $this-&gt;add($key, $val);
+        }
+    }
+
+    public function add($route, $params) 
+    {
+        $route = parse_url($route, PHP_URL_PATH);	
+        $route = '#^'.$route.'$#';
+        $this-&gt;routes[$route] = $params;
+    }
+
+	//this is not a very secure way to do this but later on in
+	//the tutorial, when we start talking about security, we will 
+	//return here to patch it
+    public function match() 
+    {
+        $url = parse_url(trim($_SERVER['REQUEST_URI'], ROOT_URI_PATH), PHP_URL_PATH);
+
+        foreach ($this-&gt;routes as $route =&gt; $params) {
+            if (preg_match($route, $url, $matches)) {
+                $this-&gt;params = $params;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function run()
+    {
+        if ($this-&gt;match()) {
+            $path = 'application\controllers\\'.ucfirst($this-&gt;params['controller']).'Controller';
+            if (class_exists($path)) {
+                $action = $this-&gt;params['action'].'Action';
+                if (method_exists($path, $action)) {
+                    $controller = new $path($this-&gt;params);
+                    $controller-&gt;$action();
+                } else {
+                    View::errorCode(400); //both match and controller are found, but there is no action with that name, return 400
+                }
+            } else {
+                View::errorCode(500); //match is found, but there is no controller, return 500
+            }
+        } else {
+            View::errorCode(404); //no match found, return 404
+        }
+    }
+
+}
+</code></pre>
+<p>We are almost done with the core, so let's open the <code>/application/core/Controller.php</code>. We don't wanna too much code in here. In fact, rule of thumb is that all business logic should be placed in models, and controllers should just point	 which model should be passed to which view. So with that in mind lets create an abstract class for controllers. </p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use View;
+
+// We are using abstract class here because this is just
+// a template for controllers. Every section of the webapp 
+// will have it's own controller that will extend this template
+abstract class Controller 
+{
+
+	public $route;
+	public $view;
+
+	public function __construct($route) 
+	{
+		$this-&gt;route = $route;
+
+		$this-&gt;view = new View($route);
+		
+		//if model is named the same as a controller, 
+		//load it automatically
+		$this-&gt;model = $this-&gt;loadModel($route['controller']);
+	}
+
+	public function loadModel($name) 
+	{
+		$path = 'application\models\\'.ucfirst($name);
+		if (class_exists($path)) {
+			return new $path;
+		}
+	}
+
+}
+</code></pre>
+<p>When I said that we are almost done with the core functionality I meant it, as the contents for our last file <code>/application/core/Model.php</code> are just:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+abstract class Model 
+{	
+}
+</code></pre>
+<p>Contents of the model are usually specific to that model, so right now we will leave it empty, but later on, when we add database support into the mix, we can extend it with some common functionalities.</p>
+<p>And that is it. In the next section we will create a simple webpage to test if everything is working, then we will move on to extend our framework further.</p>
+<h1><a class="header" href="#chapter-4---first-app" id="chapter-4---first-app">Chapter 4 - First app</a></h1>
+<p>Now that we have the core set up, we are ready building something. First, let's edit the index.php in the root folder of our project. As a first file server will load, we need to make sure it has the instructions to initialize the router, so that our app can be triggered.</p>
+<pre><code class="language-php">&lt;?php
+
+use application\core\Router;
+
+define('ROOT_PATH', __DIR__. '/');
+require_once ROOT_PATH . 'application/config/config.php';
+
+//autoload_register will magically load every class that we need
+spl_autoload_register(function($class) {
+    $path = str_replace('\\', '/', $class.'.php');
+    if (file_exists($path)) {
+        require $path;
+    }
+});
+
+if(ENVIRONMENT === 'dev') {
+	//debug flags will go here later on
+}elseif(ENVIRONMENT === 'prod'){
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}else{
+    die('Fatal error: environment not defined or valid!');
+}
+
+$router = new Router;
+$router-&gt;run();
+
+</code></pre>
+<p>Now that that's done lets quickly add some basic html template. Open the <code>/public/templates/default.php</code> and add</p>
+<pre><code class="language-php">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;!-- $content is rendered in view --&gt;
+	&lt;?php echo $content; ?&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>we also need to create the view, so navigate to <code>/public/views/</code> and create folder &quot;main&quot; (which will also be the name of our controller) and in it create the file &quot;index.php&quot; (&quot;index&quot; being the name of the triggered action in that controller) and paste this</p>
+<pre><code class="language-php">&lt;p&gt;
+	&lt;!-- $data will be defined in the controller --&gt;
+	&lt;?php echo $data-&gt;getMessage(); ?&gt;
+&lt;/p&gt;
+</code></pre>
+<p>Okay. Now we are done with the frontend so let's get back to our <code>/application/config/routes.php</code> and add a new route:</p>
+<pre><code class="language-php">&lt;?php
+
+return [
+	
+	// '' (as in empty string) is equivalent to domain name
+	// for example ourwebsite.com, if we, for example wrote  
+	// 'topic/new' user would need to navigate to 
+	// ourwebsite.com/topic/new to trigger the route
+
+	'' =&gt; ['controller' =&gt; 'main',  'action' =&gt; 'index'],
+
+];
+</code></pre>
+<p>Now lets create a model for our page. Create folder &quot;models&quot; inside <code>/application/</code> directory and inside it create Main.php, then open it and write something like this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\models;
+
+
+use application\core\Model;
+
+class Main extends Model //we are extending the model defined in the core/
+{
+	public function getMessage()
+	{
+
+        return &quot;My message&quot;;
+    }
+}
+</code></pre>
+<p>Great, now we have something to return to view. Now we only need to make a controller that will put it all together. Create folder &quot;controllers&quot; in <code>/application/</code> and inside it create the file &quot;MainController.php&quot;</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\controllers;
+
+
+use application\core\Controller;
+
+class MainController extends Controller {
+
+	public function indexAction() {
+		//if model is named like the controller (like it is now) 
+		//we don't have to explicitly define it
+
+		$vars = [
+			'data' =&gt; $this-&gt;model-&gt;get
+		];
+
+		$this-&gt;view-&gt;render($vars);
+	}
+
+}
+</code></pre>
+<p>Now when you navigate your browser to &quot;ourwebapp.com/home/page&quot; we are greeted wtih the fallowing screen:</p>
+<p><img src="https://imgur.com/JAuapCU.png" alt="Screenshot" /></p>
+<p>And there you have it. Our first app creted with this framework. In the next sections we will talk about security and error handling, add a database support then make another example that is more in line with what would you think when you hear someone says web app.</p>
+<h1><a class="header" href="#chapter-5---basic-security" id="chapter-5---basic-security">Chapter 5 - Basic security</a></h1>
+<p>I have told you before that this framework will not be of a production grade quality, but that does not mean we should leave the security holes wide open. In this chapter we will make three new classes that will hopefully make this framework more secure. And first class we'll be covering is request helper. So create a new folder &quot;helpers&quot; in our <code>/application/</code> directory and put in it a new file &quot;Request.php&quot;.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+class Request 
+{
+
+}
+
+</code></pre>
+<p>This class will consist of three parts. First is gonna be so called checkers part that we can use to get informations about the request so let's add those methods in our Request.php file.</p>
+<pre><code class="language-php">//returns protocol used for by the request
+public static function protocol() {
+    $secure = (self::server('HTTP_HOST') &amp;&amp; self::server('HTTPS') &amp;&amp; strtolower(self::server('HTTPS')) !== 'off');
+
+    return $secure ? 'https' : 'http';
+}
+
+//check if the request is sent via ajax function
+public static function isAjax() {
+    return (self::server('HTTP_X_REQUESTED_WITH') &amp;&amp; strtolower(self::server('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest');
+}
+
+//determains which method is used to send a request
+public static function method($upper = true) {
+    $method = self::server('REQUEST_METHOD');
+
+    return $upper ? strtoupper($method) : strtolower($method);
+}
+
+//and finally we can check the referer header if we need to
+public static function referrer($default = null) {
+    $referrer = self::server('HTTP_REFERER', $default);
+
+    if ($referrer === null &amp;&amp; $default !== null) {
+        $referrer = $default;
+    }
+
+    return $referrer;
+}
+</code></pre>
+<p>Now those methods are just used to check something, they don't actually parse the request. To do so we first need to sanatize it, so let's also add the function that will do just that.</p>
+<pre><code class="language-php">public static function xssClean($str = '') {
+    // No data? We're done here
+    if (is_string($str) &amp;&amp; trim($str) === '') {
+        return $str;
+    }
+
+    // Recursive sanitize if this is an array
+    if (is_array($str)) {
+        foreach ($str as $key =&gt; $value) {
+            $str[$key] = self::xssClean($value);
+        }
+
+        return $str;
+    }
+
+    $str = str_replace(array(
+        '&amp;amp;',
+        '&amp;lt;',
+        '&amp;gt;'
+    ), array(
+        '&amp;amp;amp;',
+        '&amp;amp;lt;',
+        '&amp;amp;gt;'
+    ), $str);
+
+    // Fix &amp;entitiy\n;
+    $str = preg_replace('#(&amp;\#*\w+)[\x00-\x20]+;#u', '$1;', $str);
+    $str = preg_replace('#(&amp;\#x*)([0-9A-F]+);*#iu', '$1$2;', $str);
+    $str = html_entity_decode($str, ENT_COMPAT, 'UTF-8');
+
+    // remove any attribute starting with &quot;on&quot; or xmlns
+    $str = preg_replace('#(&lt;[^&gt;]+[\x00-\x20\&quot;\'\/])(on|xmlns)[^&gt;]*&gt;#iUu', '$1&gt;', $str);
+
+    // remove javascript
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\&quot;]*)[\x00-\x20\/]*j[\x00-\x20]*a[\x00-\x20]*v[\x00-\x20]*a[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iUu', '$1=$2nojavascript...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\&quot;]*)[\x00-\x20\/]*v[\x00-\x20]*b[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iUu', '$1=$2novbscript...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\&quot;]*)[\x00-\x20\/]*-moz-binding[\x00-\x20]*:#Uu', '$1=$2nomozbinding...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\&quot;]*)[\x00-\x20\/]*data[\x00-\x20]*:#Uu', '$1=$2nodata...', $str);
+
+    // Remove any style attributes, IE allows too much stupid things in them
+    $str = preg_replace('#(&lt;[^&gt;]+[\x00-\x20\&quot;\'\/])style[^&gt;]*&gt;#iUu', '$1&gt;', $str);
+
+    // Remove namespaced elements
+    $str = preg_replace('#&lt;/*\w+:\w[^&gt;]*&gt;#i', '', $str);
+
+    // Remove really unwanted tags
+    do {
+        $oldstring = $str;
+        $str = preg_replace('#&lt;/*(applet|meta|xml|blink|link|style|script|embed|object|iframe|frame|frameset|ilayer|layer|bgsound|title|base)[^&gt;]*&gt;#i', '', $str);
+    }
+    while ($oldstring !== $str);
+
+    return $str;
+}
+</code></pre>
+<p>Now every time we need to get data from the request we'll need to run it through xssClean function, but doing so is easy to forget so lets add some wrapper methods to help us with that.</p>
+<pre><code class="language-php">//check if something exists in request payload
+private static function _findFromArray($array = array(), $item = '', $default = null, $xss_clean = true) {
+    if (empty($array)) {
+        return $default;
+    }
+
+    if ( ! $item) {
+        $arr = array();
+        foreach (array_keys($array) as $key) {
+            $arr[$key] = self::_fetchFromArray($array, $key, $default, $xss_clean);
+        }
+        return $arr;
+    }
+
+    return self::_fetchFromArray($array, $item, $default, $xss_clean);
+}
+
+//if it exists, fetch it
+private static function _fetchFromArray($array, $item = '', $default = null, $xss_clean = true) {
+    if ( ! isset($array[$item])) {
+        return $default;
+    }
+
+    if ($xss_clean) {
+        return self::xssClean($array[$item]);
+    }
+
+    return $array[$item];
+}
+</code></pre>
+<p>Now we have wrappers that will make sure we always sanatize request payload before we use them. But it looks ugly and it's not really intuitive, so let's also add the layer of abstraction over it so when we use it we know, on glance, what it's used for.</p>
+<pre><code class="language-php">public static function server($index = '', $default = null) {
+    return self::_findFromArray($_SERVER, $index, $default, false);
+}
+
+public static function get($item = null, $default = null, $xss_clean = true) {
+    return self::_findFromArray($_GET, $item, $default, $xss_clean);
+}
+
+public static function post($item = null, $default = null, $xss_clean = true) {
+    return self::_findFromArray($_POST, $item, $default, $xss_clean);
+}
+
+public static function request($item = null, $default = null, $xss_clean = true) {
+    $request = array_merge($_GET, $_POST);
+
+    return self::_findFromArray($request, $item, $default, $xss_clean);
+}
+
+public static function file($item = null, $default = null) {
+    // If a file field was submitted without a file selected, this may still return a value.
+    // It is best to use this method along with Input::hasFile()
+    return self::_findFromArray($_FILES, $item, $default, false);
+}
+</code></pre>
+<p>We can do an even higher level of abstraction if we want. In fact, let's do it, just to make things easier for us later on.</p>
+<pre><code class="language-php">public static function inGet($item = null) {
+    return self::get($item, null, false) !== null;
+}
+
+public static function inPost($item = null) {
+    return self::post($item, null, false) !== null;
+}
+
+public static function inRequest($item = null) {
+    return self::request($item, null, false) !== null;
+}
+
+public static function inFile($item = null) {
+    return self::file($item) !== null;
+}
+
+public static function hasFile($item = null) {
+    $file = self::file($item);
+
+    return ($file !== null &amp;&amp; $file['tmp_name'] !== '');
+}
+</code></pre>
+<p>And that is it for the request helper. Now we can patch some earlier vulnerabilities. Edit the file <code>/application/core/Router.php</code> like this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+use View;
+use application\helpers\Request;
+
+class Router 
+{
+
+    protected $routes = [];
+    protected $params = [];
+    
+    public function __construct() 
+    {
+        $arr = require 'application/config/routes.php';
+        foreach ($arr as $key =&gt; $val) {
+            $this-&gt;add($key, $val);
+        }
+    }
+
+    public function add($route, $params) 
+    {
+        $route = parse_url($route, PHP_URL_PATH);
+        $route = '#^'.$route.'$#';
+        $this-&gt;routes[$route] = $params;
+    }
+
+    public function match() 
+    {
+        $url = parse_url(trim(Request::server('REQUEST_URI'), ROOT_URI_PATH), PHP_URL_PATH);
+
+        foreach ($this-&gt;routes as $route =&gt; $params) {
+            if (preg_match($route, $url, $matches)) {
+                $this-&gt;params = $params;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function run()
+    {
+        if ($this-&gt;match()) {
+            $path = 'application\controllers\\'.ucfirst($this-&gt;params['controller']).'Controller';
+            if (class_exists($path)) {
+                $action = $this-&gt;params['action'].'Action';
+                if (method_exists($path, $action)) {
+                    $controller = new $path($this-&gt;params);
+                    $controller-&gt;$action();
+                } else {
+                    View::errorCode(500);
+                }
+            } else {
+                View::errorCode(400);
+            }
+        } else {
+            View::errorCode(404);
+        }
+    }
+
+}
+</code></pre>
+<p>We can also put the <code>use application\helpers\Request;</code> in the <code>/application/core/Model.php</code> so it look like this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use application\helpers\Request;
+
+abstract class Model 
+{	
+
+}
+</code></pre>
+<p>The next file we are going to make will be focused on protection against csrf attacks so create a file <code>/application/helpers/CSRF.php</code></p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class CSRF
+{
+    public static $name = '_CSRF';
+
+    public function __construct()
+    {
+        session_start(); //later we will need to make sessions a bit more secure also
+    }
+
+    public function insert($form = 'default')
+    {
+        echo '&lt;input type=&quot;hidden&quot; name=&quot;csrf_token&quot; value=&quot;' . $this-&gt;generate($form) . '&quot;&gt;';
+    }
+
+
+    public function generate($form = NULL)
+    {
+        $token = self::token() . self::fingerprint();
+        $_SESSION[self::$name . '_' . $form] = $token;
+        return $token;
+    }
+
+    public function check($token, $form = NULL)
+    {
+         if( isset($_SESSION[self::$name . '_' . $form]) &amp;&amp; $_SESSION[self::$name . '_' . $form] == $token){ //token OK
+            return (substr($token, -32) === self::fingerprint()); // fingerprint OK?
+        }
+        return FALSE;
+    }
+
+    protected static function token()
+    {
+        mt_srand((double) microtime() * 10000);
+        $charid = strtoupper(md5(uniqid(rand(), TRUE)));
+        return substr($charid, 0, 8) .
+               substr($charid, 8, 4) .
+               substr($charid, 12, 4) .
+               substr($charid, 16, 4) .
+               substr($charid, 20, 12);
+    }
+
+    protected static function fingerprint()
+    {
+        return strtoupper(md5(implode('|', array(Request::server('REMOTE_ADDR'), Request::server('HTTP_USER_AGENT')))));
+    }
+}
+</code></pre>
+<p>That was a relatively simple class, what it does is basicly generating and checking the csrf token when forms are sent. Let's add that to our view core class so that it always has csrf token ready if we need to create form in the future. Edit the <code>/application/core/View.php</code></p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use application\helpers\CSRF;
+
+class View 
+{
+
+	public $path;
+	public $route;
+	public $layout;
+
+	public function __construct($route, $layout=LAYOUT) 
+	{
+		$this-&gt;route = $route;
+		$this-&gt;layout = $layout;
+		$this-&gt;path = $route['controller'].'/'.$route['action'];
+	}
+
+	public function render($vars = []) 
+	{
+		$csrf = new CSRF(); // create a new csrf object so we can use it to generate tokens on the fly
+		extract($vars);
+		$path = VIEW_PATH . $this-&gt;path. '.php';
+		if (file_exists($path)) {
+			ob_start();
+			require $path;
+			$content = ob_get_clean();
+			require PUBLIC_PATH . '/layouts/'.$this-&gt;layout.'.php';
+		}
+	}
+
+	public static function errorCode($code) 
+	{
+		http_response_code($code);
+		$path = PUBLIC_PATH . '/errors/'.$code.'.php';
+		if (file_exists($path)) {
+			require $path;
+		}
+		exit;
+	}
+
+    public function redirect($url)
+    {
+        header('location: '.$url);
+        exit;
+    }
+}	
+</code></pre>
+<p>And with that we are done with csrf helper class. The last class we are going to make in this chapter is a validation helper class. So create yet another in <code>/application/helpers/</code> and name it Validation.php. This will be a relativly long file, but all it holds is a list of definitions for the rules we are going to use when we get to validate user input. It is worth noting that is not a be all end all list of validators, if you think your app will need some additional definitions then by all means add them. But for the course of this tutorial theese should be enough. </p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+class Validation {
+
+	public static function checkLength($value, $maxLength, $minLength = 0) 
+	{
+		if (!(strlen($value) &gt; $maxLength) &amp;&amp; !(strlen($value) &lt; $minLength)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function compare($value1, $value2, $caseSensitive = false) 
+	{
+		if ($caseSensitive) {
+			return ($value1 == $value2 ? true : false);
+		} else {
+			if (strtoupper($value1) == strtoupper($value2)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	public static function contains($string, $find, $caseSensitive = true) 
+	{
+		if (strlen($find) == 0) {
+			return true;
+		} else {
+			if ($caseSensitive) {
+				return (strpos($string, $find) !== false);
+			} else {
+				return (strpos(strtoupper($string), strtoupper($find)) !== false);
+			}
+		}
+	}
+
+	public static function convertToDate($date, $timezone = TIMEZONE, $forceFixDate = true) 
+	{
+		if ($date instanceof DateTime) {
+			return $date;
+		} else {
+			date_default_timezone_set($timezone);
+
+			$timestamp = strtotime($date);
+
+			if ($timestamp) {
+				$date = DateTime::createFromFormat('U', $timestamp);
+			} else {
+				$date = false;
+			}
+
+			return $date;
+		}
+	}
+
+	public static function getAge($dob, $timezone = TIMEZONE) 
+	{
+		$date     = self::convertToDate($dob, $timezone);
+		$now      = new DateTime();
+		$interval = $now-&gt;diff($date);
+		return $interval-&gt;y;
+	}
+
+	public static function getDefaultOnEmpty($value, $default) 
+	{
+		if (self::hasValue($value)) {
+			return $value;
+		} else {
+			return $default;
+		}
+	}
+
+	public static function hasArrayKeys($array, $required_keys, $keys_case = false) 
+	{
+		$valid = true;
+		if (!is_array($array)) {
+			$valid = false;
+		} else {
+			foreach ($required_keys as $key) {
+				if ($keys_case == CASE_UPPER) {
+					if (!array_key_exists(strtoupper($key), $array)) {
+						$valid = false;
+					}
+				} elseif ($keys_case == CASE_LOWER) {
+					if (!array_key_exists(strtolower($key), $array)) {
+						$valid = false;
+					}
+				} else {
+					if (!array_key_exists($key, $array)) {
+						$valid = false;
+					}
+				}
+			}
+		}
+		return $valid;
+	}
+
+	public static function hasValue($value) 
+	{
+		return !(self::isEmpty($value));
+	}
+
+	public static function isOfAge($age, $legal = 18) 
+	{
+		return self::getAge($age) &lt; $legal ? false : true;
+	}
+
+	public static function isAlpha($value, $allow = '') 
+	{
+		if (preg_match('/^[a-zA-Z' . $allow . ']+$/', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isAlphaNumeric($value) 
+	{
+		if (preg_match('/^[A-Za-z0-9 ]+$/', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isEmail($email) 
+	{
+		$pattern = '/^([a-zA-Z0-9])+([\.a-zA-Z0-9_-])*@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-]+)+/';
+
+		if (preg_match($pattern, $email)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isEmpty($value) 
+	{
+		if (!isset($value)) {
+			return true;
+		} elseif (is_null($value)) {
+			return true;
+		} elseif (is_string($value) &amp;&amp; strlen($value) == 0) {
+			return true;
+		} elseif (is_array($value) &amp;&amp; count($value) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isFloat($number) 
+	{
+		if (is_float($number)) {
+			return true;
+		} else {
+			$pattern = '/^[-+]?(((\\\\d+)\\\\.?(\\\\d+)?)|\\\\.\\\\d+)([eE]?[+-]?\\\\d+)?$/';
+    		return (!is_bool($number) &amp;&amp;
+				(is_float($number) || preg_match($pattern, trim($number))));
+		}
+	}
+
+	public static function isInternetURL($value) 
+	{
+		if (preg_match('/^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&amp;=]*)?$/i', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isNumber($number) 
+	{
+		if (preg_match('/^\-?\+?[0-9e1-9]+$/', $number)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isTooLong($value, $maximumLength) 
+	{
+		if (strlen($value) &gt; $maximumLength) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isTooShort($value, $minimumLength) 
+	{
+		if (strlen($value) &lt; $minimumLength) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isValidCreditCardNumber($cardnumber) 
+	{
+		$number    = preg_replace('/[^0-9]/i', '', $cardnumber);
+		$length    = strlen($number);
+		$revNumber = strrev($number);
+
+		// calculate checksum
+		$sum       = '';
+		for ($i = 0; $i &lt; $length; $i++) {
+			$sum .= $i &amp; 1 ? $revNumber[$i] * 2 : $revNumber[$i];
+		}
+
+		return array_sum(str_split($sum)) % 10 === 0;
+	}
+
+	public static function isValidJSON($string) 
+	{
+		@json_decode($string);
+		return (json_last_error() == JSON_ERROR_NONE);
+	}
+
+	public static function sanitize($input) 
+	{
+		$search = array(
+			'@&lt;script[^&gt;]*?&gt;.*?&lt;/script&gt;@si',   // Strip out javascript
+			'@&lt;[\/\!]*?[^&lt;&gt;]*?&gt;@si',            // Strip out HTML tags
+			'@&lt;style[^&gt;]*?&gt;.*?&lt;/style&gt;@siU',    // Strip style tags properly
+			'@&lt;![\s\S]*?--[ \t\n\r]*&gt;@'         // Strip multi-line comments
+		);
+		return preg_replace($search, '', $input);
+	}
+
+	public static function stripExcessWhitespace($string) 
+	{
+		return preg_replace('/  +/', ' ', $string);
+	}
+
+	public static function stripNonAlpha($string) 
+	{
+		return preg_replace('/[^a-z]/i', '', $string);
+	}
+
+	public static function stripNonAlphaHyphenSpaces($string) 
+	{
+		return preg_replace('/[^a-z\- ]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumeric($string) 
+	{
+		return preg_replace('/[^a-z0-9]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumericHyphenSpaces($string) 
+	{
+		return preg_replace('/[^a-z0-9\- ]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumericSpaces($string) 
+	{
+		return preg_replace('/[^a-z0-9 ]/i', '', $string);
+	}
+
+	public static function stripNonNumeric($string) 
+	{
+		return preg_replace('/[^0-9]/', '', $string);
+	}
+
+	public static function trim($value, $mask = ' ') 
+	{
+		if (is_string($value)) {
+			return trim($value, $mask);
+		} elseif (is_null($value)) {
+			return '';
+		} else {
+			return $value;
+		}
+	}
+
+	public static function truncate($string, $length, $dots = '') 
+	{
+		if (strlen($string) &gt; $length) {
+			return substr($string, 0, $length - strlen($dots)) . $dots;
+		} else {
+			return $string;
+		}
+	}
+
+	public static function truncateDecimal($float, $precision = 0) 
+	{
+		$pow     = pow(10, $precision);
+		$precise = (int) ($float * $pow);
+		return (float) ($precise / $pow);
+	}
+}
+</code></pre>
+<p>We could also use some abstraction if the data we are going to validate needs to pass multiple checks. For example if we are going to validate password we could also add this:</p>
+<pre><code class="language-php">public static function validatePassword($password, $confirm, $email = '', $username = '', $forceUpperLower = false) 
+{
+
+	$problem = '';
+
+	if ($password != $confirm) {
+		$problem .= 'Password and confirm password fields did not match.' . &quot;&lt;br&gt;\n&quot;;
+	}
+	if (strlen($password) &lt; 8) {
+		$problem .= 'Password must be at least 8 characters long.' . &quot;&lt;br&gt;\n&quot;;
+	}
+	if ($email) {
+		if (strpos(strtoupper($password), strtoupper($email)) !== false
+			|| strpos(strtoupper($password), strtoupper(strrev($email))) !== false) {
+			$problem .= 'Password cannot contain the email address.' . &quot;&lt;br&gt;\n&quot;;
+		}
+	}
+	if ($username) {
+		if (strpos(strtoupper($password), strtoupper($username)) !== false
+			|| strpos(strtoupper($password), strtoupper(strrev($username))) !== false) {
+			$problem .= 'Password cannot contain the username (or reversed username).' . &quot;&lt;br&gt;\n&quot;;
+		}
+	}
+	if (!preg_match('#[0-9]+#', $password)) {
+		$problem .= 'Password must contain at least one number.' . &quot;&lt;br&gt;\n&quot;;
+	}
+	if ($forceUpperLower) {
+		if (!preg_match('#[a-z]+#', $password)) {
+			$problem .= 'Password must contain at least one lowercase letter.' . &quot;&lt;br&gt;\n&quot;;
+		}
+		if (!preg_match('#[A-Z]+#', $password)) {
+			$problem .= 'Password must contain at least one uppercase letter.' . &quot;&lt;br&gt;\n&quot;;
+		}
+	} else {
+		if (!preg_match('#[a-zA-Z]+#', $password)) {
+			$problem .= 'Password must contain at least one letter.' . &quot;&lt;br&gt;\n&quot;;
+		}
+	}
+
+	if (strlen($problem) == 0) {
+		$problem = false;
+	} else ($returnArray) {
+		$problem = explode(&quot;&lt;br&gt;\n&quot;, trim($problem, &quot;&lt;br&gt;\n&quot;));
+	}
+
+	return $problem;
+}
+</code></pre>
+<p>And that is all for this chapter. Soon we will integrate database support and so we can start create some more interesting examples, but before that we will need to secure our sessions a bit. So that is what we'll do in the next chapter.</p>
+<h1><a class="header" href="#chapter-6---cookies-and-sessions" id="chapter-6---cookies-and-sessions">Chapter 6 - Cookies and sessions</a></h1>
+<p>When we created CSRF helper in the last chapter we briefly mentioned that we'll need to tighten the security of our sessions. So now we will do just that. First we need to define three new variables in our config.php file</p>
+<pre><code class="language-php">define('SESSION_PATH', ROOT_PATH . 'application/storage/sessions/');
+define('SESSION_KEY', 'randomstringofcharacters');
+define('SESSION_TTL', 60);
+</code></pre>
+<p>Now create a new file named &quot;SecureSession.php&quot; inside the <code>/application/helpers/</code> folder.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+use SessionHandler;
+
+class SecureSession extends SessionHandler
+{
+
+    protected $key, $name, $cookie;
+
+    public function __construct($key = SESSION_KEY, $name = 'SESSION')
+    {
+        $this-&gt;key = $key;
+        $this-&gt;name = $name;
+        if(!isset($_SESSION)) {
+            $this-&gt;setup();
+        }
+    }
+    
+    protected function setup()
+    {
+		ini_set('session.use_cookies', 1);
+		ini_set('session.use_only_cookies', 1);
+
+        session_name($this-&gt;name);
+    }
+}
+</code></pre>
+<p>It's also a good idea to have a session encrypted so lets also add that</p>
+<pre><code class="language-php">private function _encrypt($data, $key) {
+    $encryption_key = base64_decode($key);
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+    if($iv===false) die('Fatal error: encryption was not successful - could not save data!!'); // weak encryption
+
+    $encrypted = openssl_encrypt($data, 'aes-256-cbc', $encryption_key, 0, $iv);
+    return base64_encode($encrypted . '::' . $iv);
+}
+
+private function _decrypt($data, $key) {
+    $encryption_key = base64_decode($key);
+    list($encrypted_data, $iv) = explode('::', base64_decode($data), 2);
+    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $encryption_key, 0, $iv);
+}
+
+//and abstract it
+public function _read($id)
+{
+    return $this-&gt;_decrypt(parent::read($id), $this-&gt;key);
+}
+
+public function _write($id, $data)
+{
+    return parent::write($id, $this-&gt;_encrypt($data, $this-&gt;key));
+}
+</code></pre>
+<p>Now we can add the ussual session functionality</p>
+<pre><code class="language-php">public function start()
+{
+    if (session_id() === '') {
+        session_start();
+        return (mt_rand(0, 4) === 0) ? $this-&gt;refresh() : true; // 1/5
+    }
+
+    return false;
+}
+
+public function forget()
+{
+    if (session_id() === '') {
+        return false;
+    }
+
+    $_SESSION = [];
+
+    return session_destroy();
+}
+
+public function refresh()
+{
+    return session_regenerate_id(true);
+}
+</code></pre>
+<p>We should also have some method for validating sessions</p>
+<pre><code class="language-php">public function isExpired($ttl = SESSION_TTL)
+{
+    $activity = isset($_SESSION['_last_activity'])
+        ? $_SESSION['_last_activity']
+        : false;
+
+    if ($activity !== false &amp;&amp; time() - $activity &gt; $ttl * 60) {
+        return true;
+    }
+
+    $_SESSION['_last_activity'] = time();
+
+    return false;
+}
+
+public function isFingerprint()
+{
+    $hash = md5(
+        $_SERVER['HTTP_USER_AGENT'] .
+        (ip2long($_SERVER['REMOTE_ADDR']) &amp; ip2long('255.255.0.0'))
+    );
+
+    if (isset($_SESSION['_fingerprint'])) {
+        return $_SESSION['_fingerprint'] === $hash;
+    }
+
+    $_SESSION['_fingerprint'] = $hash;
+
+    return true;
+}
+
+//and abstarct it
+public function isValid($ttl = SESSION_TTL)
+{
+    return ! $this-&gt;isExpired($ttl) &amp;&amp; $this-&gt;isFingerprint();
+}
+</code></pre>
+<p>And final two methods are for getting and setting values from the session</p>
+<pre><code class="language-php">public function get($name)
+{
+    $parsed = explode('.', $name);
+
+    $result = $_SESSION;
+
+    while ($parsed) {
+        $next = array_shift($parsed);
+
+        if (isset($result[$next])) {
+            $result = $result[$next];
+        } else {
+            return null;
+        }
+    }
+
+    return $result;
+}
+
+public function put($name, $value)
+{
+    $parsed = explode('.', $name);
+
+    $session =&amp; $_SESSION;
+
+    while (count($parsed) &gt; 1) {
+        $next = array_shift($parsed);
+
+        if ( ! isset($session[$next]) || ! is_array($session[$next])) {
+            $session[$next] = [];
+        }
+
+        $session =&amp; $session[$next];
+    }
+
+    $session[array_shift($parsed)] = $value;
+}
+</code></pre>
+<p>That's it we now have are secured session system. Now edit our CSRF helper to look like this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class CSRF
+{
+    public static $name = '_CSRF';
+
+    public function __construct()
+    {
+        $this-&gt;session = new SecureSession();
+        $this-&gt;session-&gt;start();
+    }
+
+    public function insert($form = 'default')
+    {
+        echo '&lt;input type=&quot;hidden&quot; name=&quot;csrf_token&quot; value=&quot;' . $this-&gt;generate($form) . '&quot;&gt;';
+    }
+
+
+    public function generate($form = NULL)
+    {
+        $token = self::token() . self::fingerprint();
+        $this-&gt;session-&gt;put(self::$name . '_' . $form,  $token);
+        return $token;
+    }
+
+    public function check($token, $form = NULL)
+    {
+        if ($this-&gt;session-&gt;get(self::$name . '_' . $form) &amp;&amp; $this-&gt;session-&gt;get(self::$name . '_' . $form) === $token) { // token OK
+            return (substr($token, -32) === self::fingerprint()); // fingerprint OK?
+        }
+        return FALSE;
+    }
+
+    protected static function token()
+    {
+        mt_srand((double) microtime() * 10000);
+        $charid = strtoupper(md5(uniqid(rand(), TRUE)));
+        return substr($charid, 0, 8) .
+               substr($charid, 8, 4) .
+               substr($charid, 12, 4) .
+               substr($charid, 16, 4) .
+               substr($charid, 20, 12);
+    }
+
+    protected static function fingerprint()
+    {
+        return strtoupper(md5(implode('|', array(Request::server('REMOTE_ADDR'), Request::server('HTTP_USER_AGENT')))));
+    }
+}
+</code></pre>
+<p>Now that we have done that we need to ensure that session will be started when website is opened. To do that we will need to create folder named &quot;middleware&quot; in <code>/application/</code> directory and inside create the file &quot;Persister.php&quot;</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\middleware;
+
+
+use application\helpers\SecureSession;
+
+class Persister
+{
+    public static $session;
+
+    public static function run()
+    {
+        $session = new SecureSession(SESSION_KEY, 'PHPSESSID');
+
+        ini_set('session.save_handler', 'files');
+        session_set_save_handler($session, true);
+        session_save_path(SESSION_PATH);
+
+        $session-&gt;start();
+    }
+}
+</code></pre>
+<p>Now we need to register middleware in the core, so let's create Middleware.php inside <code>/application/core/</code> and write this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use application\middleware\Persister;
+
+class Middleware
+{
+    public static function persist()
+    {
+        Persister::run();
+    }
+}
+</code></pre>
+<p>And finally we need to call th middleware in our root index.php file so change it's contents to the following</p>
+<pre><code class="language-php">&lt;?php
+
+use application\core\Router;
+use application\core\Middleware;
+
+define('ROOT_PATH', __DIR__. '/');
+require_once ROOT_PATH . 'application/config/config.php';
+
+spl_autoload_register(function($class) {
+    $path = str_replace('\\', '/', $class.'.php');
+    if (file_exists($path)) {
+        require $path;
+    }
+});
+
+if(ENVIRONMENT === 'dev') {
+	//debugger handler
+}elseif(ENVIRONMENT === 'prod'){
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}else{
+    die('Fatal error: environment not defined or valid!');
+}
+
+Middleware::persist(); 
+
+$router = new Router;
+$router-&gt;run();
+
+</code></pre>
+<p>That's it sessions are up and running. Next up are cookies so create <code>/application/helper/Cookies.php</code></p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class Cookies
+{
+
+    public $name;
+    public $value = '';
+    public $expires;
+    public $path = '/';
+    public $domain = '';
+    public $secure = false;
+    public $http_only = false;
+
+
+    public function __construct($name, $value = null)
+    {
+        $this-&gt;name = $name;
+        $this-&gt;domain = '.' .Request::server('SERVER_NAME');
+
+        if (Request::server('HTTPS') &amp;&amp; Request::server('HTTPS') !== 'off') {
+            $this-&gt;secure = true;
+        }
+
+        if ($value !== null) {
+            $this-&gt;value = $value;
+        }
+    }
+}
+</code></pre>
+<p>As cookies have expiry date we can create some functions that will make it easier to configure</p>
+<pre><code class="language-php">public function expires_in($time, $unit = &quot;months&quot;)
+{
+    if (!empty($time)) {
+        switch ($unit) {
+            case 'months' :
+                $time = $time * 60 * 60 * 24 * 31;
+                break;
+            case 'days'   :
+                $time = $time * 60 * 60 * 24;
+                break;
+            case 'hours'  :
+                $time = $time * 60 * 60;
+                break;
+            case 'minutes':
+                $time *= 60;
+                break;
+        }
+    }
+    $this-&gt;expires_at($time);
+}
+
+public function expires_at($time)
+{
+    if (empty($time)) {
+        $time = null;
+    }
+    $this-&gt;expires = $time;
+}
+</code></pre>
+<p>And while we are abstarcting, we might as well add methods for reading and writing to a cookie</p>
+<pre><code class="language-php">public function set()
+{
+    return setcookie(
+        $this-&gt;name,
+        $this-&gt;value,
+        $this-&gt;expires,
+        $this-&gt;path,
+        $this-&gt;domain,
+        $this-&gt;secure,
+        $this-&gt;http_only
+    );
+}
+
+public function get()
+{
+    return ($this-&gt;value === '' &amp;&amp; isset($_COOKIE[$this-&gt;name])) ? $_COOKIE[$this-&gt;name] : $this-&gt;value;
+}
+
+public function delete()
+{
+    $this-&gt;value = '';
+    $this-&gt;expires = time() - 3600;
+    return $this-&gt;set();
+}
+</code></pre>
+<p>And that's the whole cookie class. We can now add it to our middleware if we need. Actually let's do that. Open up the <code>/application/middleware/Persister.php</code> and edit it like this:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\middleware;
+
+
+use application\helpers\SecureSession;
+use application\helpers\Cookies;
+
+class Persister
+{
+    public static $session;
+    public static $cookies;
+
+    public static function run()
+    {
+        $session = new SecureSession(SESSION_KEY, 'PHPSESSID');
+
+        $cookies = new Cookies('SESSION_COOKIE');
+        $cookies-&gt;expires = 0;
+        $cookies-&gt;value = 'TRUE';
+        $cookies-&gt;set();
+
+        ini_set('session.save_handler', 'files');
+        session_set_save_handler($session, true);
+        session_save_path(SESSION_PATH);
+
+        $session-&gt;start();
+    }
+}
+</code></pre>
+<p>So now we have session cookie stored on on browser of the user who visits our webpage.</p>
+<h1><a class="header" href="#chapter-7---databases" id="chapter-7---databases">Chapter 7 - Databases</a></h1>
+<p>Now we have finally come to the part where we get to play with the databases. For the course of the tutorial I will use PDO as an abstraction layer because we might not always want to use mysql as our database, and I want to do this as modular as possible. So first we want to add next part of code to our config.php</p>
+<pre><code class="language-php">//DATABASES
+define ('CONNECTIONS', [
+    'DEFAULT' =&gt; [
+        'DB_TYPE' =&gt; 'mysql',
+        'DB_HOST' =&gt; '127.0.0.1',
+        'DB_PORT' =&gt; '3306',
+        'DB_NAME' =&gt; 'mvc',
+        'DB_USER' =&gt; 'mvcuser',
+        'DB_PASS' =&gt; 'mvcpassword',
+        'DB_CHARSET' =&gt; 'utf8'
+    ],
+]
+</code></pre>
+<p>As you can see, we will be defining our database in a multidim array so if you ever find yourself in need of handling mltiple databases simultaneously just add them to the list.<br />
+Now that we have set up the defaults it's time for us to create our database handler, so create file &quot;DB.php&quot; inside of <code>/application/helpers/</code></p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\helpers;
+
+
+use PDO;
+
+class DB extends PDO
+{
+
+    protected static $instances = array();
+
+    public static function connect($connection = 'DEFAULT')
+    {
+    		//if database is not explicitly set use default (from config.php)
+        ($connection === 'DEFAULT') ? $db = CONNECTIONS['DEFAULT'] : $db = CONNECTIONS[$connection];
+        if($db === NULL) die(&quot;Connection '$connection' is not defined&quot;);
+
+        $type = $db['DB_TYPE'];
+        $host = $db['DB_HOST'];
+        $name = $db['DB_NAME'];
+        $user = $db['DB_USER'];
+        $pass = $db['DB_PASS'];
+
+        $id = &quot;$type.$host.$name.$user.$pass&quot;;
+
+		//don't create new instance if one is already running
+		//if you need more, create new object 
+        if (isset(self::$instances[$id])) {
+            return self::$instances[$id];
+        }
+
+		//create a connection
+        $instance = new DB(&quot;$type:host=$host;dbname=$name;charset=utf8&quot;, $user, $pass);
+        $instance-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        self::$instances[$id] = $instance;
+
+        return $instance;
+    }
+}
+</code></pre>
+<p>Next we are gonna make method for selecting data from the database</p>
+<pre><code class="language-php">public function select($sql, $array = array(), $fetchMode = PDO::FETCH_OBJ, $class = '', $single = null)
+{
+    if (stripos($sql, 'select ') !== 0) {
+        $sql = 'SELECT ' . $sql;
+    }
+    $stmt = $this-&gt;prepare($sql);
+    foreach ($array as $key =&gt; $value) {
+        if (is_int($value)) {
+            $stmt-&gt;bindValue(&quot;$key&quot;, $value, PDO::PARAM_INT);
+        } else {
+            $stmt-&gt;bindValue(&quot;$key&quot;, $value);
+        }
+    }
+    $stmt-&gt;execute();
+    if ($single === null) {
+        return $fetchMode === PDO::FETCH_CLASS ? $stmt-&gt;fetchAll($fetchMode, $class) : $stmt-&gt;fetchAll($fetchMode);
+    }
+
+    return $fetchMode === PDO::FETCH_CLASS ? $stmt-&gt;fetch($fetchMode, $class) : $stmt-&gt;fetch($fetchMode);
+}
+</code></pre>
+<p>We can also abstract it by adding methods for specific selects like a</p>
+<pre><code class="language-php">//select only single row
+public function find($sql, $array = array(), $fetchMode = PDO::FETCH_OBJ, $class = '')
+{
+    return $this-&gt;select($sql, $array, $fetchMode, $class, true);
+}
+
+//select only row count
+public function count($table, $column= 'id')
+{
+    $stmt = $this-&gt;prepare(&quot;SELECT $column FROM $table&quot;);
+    $stmt-&gt;execute();
+    return $stmt-&gt;rowCount();
+}
+</code></pre>
+<p>Following this logic, insert method would look like this:</p>
+<pre><code>//table is table name
+//data is an assoc array where keys are field names, and values are data we want to insert
+public function insert($table, $data)
+{
+    ksort($data);
+    $fieldNames = implode(',', array_keys($data));
+    $fieldValues = ':'.implode(', :', array_keys($data));
+    $stmt = $this-&gt;prepare(&quot;INSERT INTO $table ($fieldNames) VALUES ($fieldValues)&quot;);
+    foreach ($data as $key =&gt; $value) {
+        $stmt-&gt;bindValue(&quot;:$key&quot;, $value);
+    }
+    $stmt-&gt;execute();
+    return $this-&gt;lastInsertId();
+}
+</code></pre>
+<p>And with that we practically insured that we will always use prepared statements, and amount of code we would be writing is as minimized as it can be because of the abstraction. Let's do that for the update function as well.</p>
+<pre><code class="language-php">public function update($table, $data, $where)
+{
+    ksort($data);
+    $fieldDetails = null;
+    foreach ($data as $key =&gt; $value) {
+        $fieldDetails .= &quot;$key = :$key,&quot;;
+    }
+    $fieldDetails = rtrim($fieldDetails, ',');
+    $whereDetails = null;
+    $i = 0;
+    foreach ($where as $key =&gt; $value) {
+        if ($i == 0) {
+            $whereDetails .= &quot;$key = :$key&quot;;
+        } else {
+            $whereDetails .= &quot; AND $key = :$key&quot;;
+        }
+        $i++;
+    }
+    $whereDetails = ltrim($whereDetails, ' AND ');
+    $stmt = $this-&gt;prepare(&quot;UPDATE $table SET $fieldDetails WHERE $whereDetails&quot;);
+    foreach ($data as $key =&gt; $value) {
+        $stmt-&gt;bindValue(&quot;:$key&quot;, $value);
+    }
+    foreach ($where as $key =&gt; $value) {
+        $stmt-&gt;bindValue(&quot;:$key&quot;, $value);
+    }
+    $stmt-&gt;execute();
+    return $stmt-&gt;rowCount();
+}
+</code></pre>
+<p>Call parameters here are the same as with insert with the addition of where parameter, because we need to specify which row we wnat to update. For example, use of update function would look like this:</p>
+<pre><code class="language-php">$data = array(
+    'firstName' =&gt; 'Joe',
+    'lastnName' =&gt; 'Smith',
+    'email' =&gt; 'someone@domain.com'
+);
+$where = array('memberID' =&gt; 2);
+$db-&gt;update('users', $data, $where);
+</code></pre>
+<p>Now delete() method is somewhat similar to the update() but instead of <em>data</em> parametere we have <em>limit</em></p>
+<pre><code class="language-php">public function delete($table, $where, $limit = 1)
+{
+    ksort($where);
+    $whereDetails = null;
+    $i = 0;
+    foreach ($where as $key =&gt; $value) {
+        if ($i == 0) {
+            $whereDetails .= &quot;$key = :$key&quot;;
+        } else {
+            $whereDetails .= &quot; AND $key = :$key&quot;;
+        }
+        $i++;
+    }
+    $whereDetails = ltrim($whereDetails, ' AND ');
+    if (is_numeric($limit)) {
+        $uselimit = &quot;LIMIT $limit&quot;;
+    }
+    $stmt = $this-&gt;prepare(&quot;DELETE FROM $table WHERE $whereDetails $uselimit&quot;);
+    foreach ($where as $key =&gt; $value) {
+        $stmt-&gt;bindValue(&quot;:$key&quot;, $value);
+    }
+    $stmt-&gt;execute();
+    return $stmt-&gt;rowCount();
+}
+</code></pre>
+<p>This should cover most use cases, but somtimes we will need a little more flexibility with generating statements. For those cases we can also add this method:</p>
+<pre><code class="language-php">//only use this if you know what you are doing
+public function raw($sql)
+{
+    return $this-&gt;query($sql);
+}
+</code></pre>
+<p>Now we can integrate our DB helper with the rest of the framework by calling it in our core model class, so let's open <code>/application/core/Model.php</code></p>
+<pre><code class="language-php">&lt;?php
+
+namespace application\core;
+
+
+use application\helpers\DB;
+use application\helpers\Request;
+
+abstract class Model 
+{	
+	protected $request;
+	protected $db;
+
+    protected static $_table = '';
+    protected static $_primaryKey = '';
+
+    protected $columns;
+
+	public function __construct() 
+	{
+		$this-&gt;request = new Request;
+        $this-&gt;db = DB::connect();
+
+        $this-&gt;columns = [];
+	}
+}
+</code></pre>
+<p>Now it looks a little more like a legit model class. Now when you create new models by extending this class, you will automagically be connected to the database, you just need to specify base table and primary. Let's add basic crud functions to our core model as well.</p>
+<pre><code class="language-php">protected function populate($object)
+{
+    foreach ($object as $key =&gt; $value) {
+        $this-&gt;set($key, $value);
+    }
+}
+
+public function set($column,$value)
+{
+    $this-&gt;columns[$column] = $value;
+}
+
+public function get($column)
+{
+    return $this-&gt;columns[$column];
+}
+
+public function create()
+{
+    return $this-&gt;db-&gt;insert(static::$_table, $this-&gt;columns);
+}
+
+public function update($where = NULL)
+{
+
+    return $this-&gt;db-&gt;update(static::$_table, $this-&gt;columns, $where);
+}
+
+public function save($where = NULL)
+{
+    if($where || $this-&gt;get(static::$_primaryKey) !== null) $this-&gt;db-&gt;update(static::$_table, $this-&gt;columns, ($where)?$where:[static::$_primaryKey=&gt;$this-&gt;get(static::$_primaryKey)]);
+    else $this-&gt;db-&gt;insert(static::$_table, $this-&gt;columns);
+    return $this;
+}
+
+public static function delete($value){
+    return DB::connect()-&gt;delete(static::$_table, [static::$_primaryKey =&gt; $value]);
+}
+
+public static function purge()
+{
+    return DB::connect()-&gt;truncate(static::$_table);
+}
+
+public static function getAll($condition=array(),$order=NULL,$startIndex=NULL,$count=NULL,$group=NULL){
+    $query = &quot;SELECT * FROM &quot; . static::$_table;
+    if(!empty($condition)){
+        $query .= &quot; WHERE &quot;;
+        foreach ($condition as $key =&gt; $value) {
+            $query .= $key . &quot;=:&quot;.$key.&quot; AND &quot;;
+        }
+    }
+    $query = rtrim($query,' AND ');
+    if($group){
+        $query .= &quot; GROUP BY &quot; . $group;
+    }
+    if($order){
+        $query .= &quot; ORDER BY &quot; . $order;
+    }
+    if($startIndex !== NULL){
+        $query .= &quot; LIMIT &quot; . $startIndex;
+        if($count){
+            $query .= &quot;,&quot; . $count;
+        }
+    }
+    foreach ($condition as $key =&gt; $value) {
+        $condition[':'.$key] = $value;
+        unset($condition[$key]);
+    }
+
+    return DB::connect()-&gt;select($query,$condition);
+}
+
+public static function findOne($value){
+
+    $sql = &quot;SELECT * FROM &quot; . static::$_table . &quot; WHERE &quot; . static::$_primaryKey . &quot; = :&quot; . static::$_primaryKey;
+    $params = [ &quot;:&quot; . static::$_primaryKey =&gt; $value];
+
+    $result = DB::connect()-&gt;find($sql, $params);
+    return $result;
+}
+
+public static function getCount(){
+    return DB::connect()-&gt;count(static::$_table);
+}
+</code></pre>
+<p>And now we have very flexible base model with database support. </p>
+<h1><a class="header" href="#chapter-8---recap" id="chapter-8---recap">Chapter 8 - Recap</a></h1>
+<p>We will use this chapter as a breather - to look back on what we have done and to talk about things we will do next.<br />
+If you have followed a tutorial until now, you folder structure probably looks somewhat like this:</p>
+<pre><code>root/
+	index.php
+	application/
+		config/
+			config.php
+			routes.php
+		controllers/
+			MainController.php
+		core/
+			Controller.php
+			Middleware.php
+			Model.php
+			Router.php
+			View.php
+		helpers/
+			Cookies.php
+			CSRF.php
+			DB.php
+			Request.php
+			SecureSession.php
+			Validation.php
+		middleware/
+			Persister.php
+		models/
+			Main.php
+		storage/
+			sessions/
+	public/
+		components/
+		errors/
+			400.php
+			404.php
+			500.php
+		layouts/
+			default.php
+		views/
+			main/
+				index.php
+</code></pre>
+<p>We started somewhat slow, with just the bare bones of the framework, but over the course of the tutorial we were addeing to that and little by little, our framework became more and more.. well, usable. We added db support, tighten our seurity, abstract the system for session and cookies and we even have a validation system.</p>
+<p>So the next part of the tutorial will focus on file handling, and localization, and when when we are done with that we are going to build our own templating engine for faster frontend developing.</p>
+<h1><a class="header" href="#chapter-9---file-handling" id="chapter-9---file-handling">Chapter 9 - File handling</a></h1>
+<p>TBD</p>
+<h1><a class="header" href="#chapter-10---localization" id="chapter-10---localization">Chapter 10 - Localization</a></h1>
+<p>TBD</p>
+<h1><a class="header" href="#chapter-11---templating" id="chapter-11---templating">Chapter 11 - Templating</a></h1>
+<p>TBD</p>
+<h1><a class="header" href="#second-app" id="second-app">Second App</a></h1>
+<p>TBD</p>
+<h1><a class="header" href="#emails" id="emails">Emails</a></h1>
+<p>TBD</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+        
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+        
+        
+
+    </body>
+</html>

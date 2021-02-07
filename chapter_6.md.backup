@@ -1,0 +1,461 @@
+# Chapter 6 - Cookies and sessions
+
+When we created CSRF helper in the last chapter we briefly mentioned that we'll need to tighten the security of our sessions. So now we will do just that. First we need to define three new variables in our config.php file
+
+```php
+define('SESSION_PATH', ROOT_PATH . 'application/storage/sessions/');
+define('SESSION_KEY', 'randomstringofcharacters');
+define('SESSION_TTL', 60);
+```
+
+Now create a new file named "SecureSession.php" inside the `/application/helpers/` folder.
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+use SessionHandler;
+
+class SecureSession extends SessionHandler
+{
+
+    protected $key, $name, $cookie;
+
+    public function __construct($key = SESSION_KEY, $name = 'SESSION')
+    {
+        $this->key = $key;
+        $this->name = $name;
+        if(!isset($_SESSION)) {
+            $this->setup();
+        }
+    }
+    
+    protected function setup()
+    {
+		ini_set('session.use_cookies', 1);
+		ini_set('session.use_only_cookies', 1);
+
+        session_name($this->name);
+    }
+}
+```
+
+It's also a good idea to have a session encrypted so lets also add that
+
+```php
+private function _encrypt($data, $key) {
+    $encryption_key = base64_decode($key);
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+    if($iv===false) die('Fatal error: encryption was not successful - could not save data!!'); // weak encryption
+
+    $encrypted = openssl_encrypt($data, 'aes-256-cbc', $encryption_key, 0, $iv);
+    return base64_encode($encrypted . '::' . $iv);
+}
+
+private function _decrypt($data, $key) {
+    $encryption_key = base64_decode($key);
+    list($encrypted_data, $iv) = explode('::', base64_decode($data), 2);
+    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $encryption_key, 0, $iv);
+}
+
+//and abstract it
+public function _read($id)
+{
+    return $this->_decrypt(parent::read($id), $this->key);
+}
+
+public function _write($id, $data)
+{
+    return parent::write($id, $this->_encrypt($data, $this->key));
+}
+``` 
+
+Now we can add the ussual session functionality
+
+```php
+public function start()
+{
+    if (session_id() === '') {
+        session_start();
+        return (mt_rand(0, 4) === 0) ? $this->refresh() : true; // 1/5
+    }
+
+    return false;
+}
+
+public function forget()
+{
+    if (session_id() === '') {
+        return false;
+    }
+
+    $_SESSION = [];
+
+    return session_destroy();
+}
+
+public function refresh()
+{
+    return session_regenerate_id(true);
+}
+```
+
+We should also have some method for validating sessions
+
+```php
+public function isExpired($ttl = SESSION_TTL)
+{
+    $activity = isset($_SESSION['_last_activity'])
+        ? $_SESSION['_last_activity']
+        : false;
+
+    if ($activity !== false && time() - $activity > $ttl * 60) {
+        return true;
+    }
+
+    $_SESSION['_last_activity'] = time();
+
+    return false;
+}
+
+public function isFingerprint()
+{
+    $hash = md5(
+        $_SERVER['HTTP_USER_AGENT'] .
+        (ip2long($_SERVER['REMOTE_ADDR']) & ip2long('255.255.0.0'))
+    );
+
+    if (isset($_SESSION['_fingerprint'])) {
+        return $_SESSION['_fingerprint'] === $hash;
+    }
+
+    $_SESSION['_fingerprint'] = $hash;
+
+    return true;
+}
+
+//and abstarct it
+public function isValid($ttl = SESSION_TTL)
+{
+    return ! $this->isExpired($ttl) && $this->isFingerprint();
+}
+``` 
+
+And final two methods are for getting and setting values from the session
+
+```php
+public function get($name)
+{
+    $parsed = explode('.', $name);
+
+    $result = $_SESSION;
+
+    while ($parsed) {
+        $next = array_shift($parsed);
+
+        if (isset($result[$next])) {
+            $result = $result[$next];
+        } else {
+            return null;
+        }
+    }
+
+    return $result;
+}
+
+public function put($name, $value)
+{
+    $parsed = explode('.', $name);
+
+    $session =& $_SESSION;
+
+    while (count($parsed) > 1) {
+        $next = array_shift($parsed);
+
+        if ( ! isset($session[$next]) || ! is_array($session[$next])) {
+            $session[$next] = [];
+        }
+
+        $session =& $session[$next];
+    }
+
+    $session[array_shift($parsed)] = $value;
+}
+```
+
+That's it we now have are secured session system. Now edit our CSRF helper to look like this:
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class CSRF
+{
+    public static $name = '_CSRF';
+
+    public function __construct()
+    {
+        $this->session = new SecureSession();
+        $this->session->start();
+    }
+
+    public function insert($form = 'default')
+    {
+        echo '<input type="hidden" name="csrf_token" value="' . $this->generate($form) . '">';
+    }
+
+
+    public function generate($form = NULL)
+    {
+        $token = self::token() . self::fingerprint();
+        $this->session->put(self::$name . '_' . $form,  $token);
+        return $token;
+    }
+
+    public function check($token, $form = NULL)
+    {
+        if ($this->session->get(self::$name . '_' . $form) && $this->session->get(self::$name . '_' . $form) === $token) { // token OK
+            return (substr($token, -32) === self::fingerprint()); // fingerprint OK?
+        }
+        return FALSE;
+    }
+
+    protected static function token()
+    {
+        mt_srand((double) microtime() * 10000);
+        $charid = strtoupper(md5(uniqid(rand(), TRUE)));
+        return substr($charid, 0, 8) .
+               substr($charid, 8, 4) .
+               substr($charid, 12, 4) .
+               substr($charid, 16, 4) .
+               substr($charid, 20, 12);
+    }
+
+    protected static function fingerprint()
+    {
+        return strtoupper(md5(implode('|', array(Request::server('REMOTE_ADDR'), Request::server('HTTP_USER_AGENT')))));
+    }
+}
+```
+
+Now that we have done that we need to ensure that session will be started when website is opened. To do that we will need to create folder named "middleware" in `/application/` directory and inside create the file "Persister.php"
+
+```php
+<?php
+
+namespace application\middleware;
+
+
+use application\helpers\SecureSession;
+
+class Persister
+{
+    public static $session;
+
+    public static function run()
+    {
+        $session = new SecureSession(SESSION_KEY, 'PHPSESSID');
+
+        ini_set('session.save_handler', 'files');
+        session_set_save_handler($session, true);
+        session_save_path(SESSION_PATH);
+
+        $session->start();
+    }
+}
+```
+
+Now we need to register middleware in the core, so let's create Middleware.php inside `/application/core/` and write this:
+
+```php
+<?php
+
+namespace application\core;
+
+
+use application\middleware\Persister;
+
+class Middleware
+{
+    public static function persist()
+    {
+        Persister::run();
+    }
+}
+```
+
+And finally we need to call th middleware in our root index.php file so change it's contents to the following
+
+```php
+<?php
+
+use application\core\Router;
+use application\core\Middleware;
+
+define('ROOT_PATH', __DIR__. '/');
+require_once ROOT_PATH . 'application/config/config.php';
+
+spl_autoload_register(function($class) {
+    $path = str_replace('\\', '/', $class.'.php');
+    if (file_exists($path)) {
+        require $path;
+    }
+});
+
+if(ENVIRONMENT === 'dev') {
+	//debugger handler
+}elseif(ENVIRONMENT === 'prod'){
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}else{
+    die('Fatal error: environment not defined or valid!');
+}
+
+Middleware::persist(); 
+
+$router = new Router;
+$router->run();
+
+```
+
+That's it sessions are up and running. Next up are cookies so create `/application/helper/Cookies.php`
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class Cookies
+{
+
+    public $name;
+    public $value = '';
+    public $expires;
+    public $path = '/';
+    public $domain = '';
+    public $secure = false;
+    public $http_only = false;
+
+
+    public function __construct($name, $value = null)
+    {
+        $this->name = $name;
+        $this->domain = '.' .Request::server('SERVER_NAME');
+
+        if (Request::server('HTTPS') && Request::server('HTTPS') !== 'off') {
+            $this->secure = true;
+        }
+
+        if ($value !== null) {
+            $this->value = $value;
+        }
+    }
+}
+```
+
+As cookies have expiry date we can create some functions that will make it easier to configure
+
+```php
+public function expires_in($time, $unit = "months")
+{
+    if (!empty($time)) {
+        switch ($unit) {
+            case 'months' :
+                $time = $time * 60 * 60 * 24 * 31;
+                break;
+            case 'days'   :
+                $time = $time * 60 * 60 * 24;
+                break;
+            case 'hours'  :
+                $time = $time * 60 * 60;
+                break;
+            case 'minutes':
+                $time *= 60;
+                break;
+        }
+    }
+    $this->expires_at($time);
+}
+
+public function expires_at($time)
+{
+    if (empty($time)) {
+        $time = null;
+    }
+    $this->expires = $time;
+}
+```
+
+And while we are abstarcting, we might as well add methods for reading and writing to a cookie
+
+```php
+public function set()
+{
+    return setcookie(
+        $this->name,
+        $this->value,
+        $this->expires,
+        $this->path,
+        $this->domain,
+        $this->secure,
+        $this->http_only
+    );
+}
+
+public function get()
+{
+    return ($this->value === '' && isset($_COOKIE[$this->name])) ? $_COOKIE[$this->name] : $this->value;
+}
+
+public function delete()
+{
+    $this->value = '';
+    $this->expires = time() - 3600;
+    return $this->set();
+}
+```
+
+And that's the whole cookie class. We can now add it to our middleware if we need. Actually let's do that. Open up the `/application/middleware/Persister.php` and edit it like this:
+
+```php
+<?php
+
+namespace application\middleware;
+
+
+use application\helpers\SecureSession;
+use application\helpers\Cookies;
+
+class Persister
+{
+    public static $session;
+    public static $cookies;
+
+    public static function run()
+    {
+        $session = new SecureSession(SESSION_KEY, 'PHPSESSID');
+
+        $cookies = new Cookies('SESSION_COOKIE');
+        $cookies->expires = 0;
+        $cookies->value = 'TRUE';
+        $cookies->set();
+
+        ini_set('session.save_handler', 'files');
+        session_set_save_handler($session, true);
+        session_save_path(SESSION_PATH);
+
+        $session->start();
+    }
+}
+``` 
+
+So now we have session cookie stored on on

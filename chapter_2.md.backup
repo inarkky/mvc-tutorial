@@ -1,0 +1,46 @@
+# Chapter 2 - Structure
+
+I will assume that you have testing environment set up (nginx/apache and database) and running. So the first thing we need to is to separate logic part of the framework from the html part. To do so, we will create two folders in the root directory of the project. It will look something like this:
+
+```
+root/
+	index.php 
+	application/ #logic goes here
+	public/	#design goes here
+```
+
+MVC stands for Model-View-Controller 	which tells us how the backend distributes tasks. Let's take a look at what it looks like in practice.
+
+```
+1. user navigates browser to somewebsite.com/forum/introductions
+2. router on ourwebsite.com recognizes the route /forum/introductions as one of it's own that happens to be governed by forum controller
+3. router calls forum controller and passes the parameters (in this case introductions)
+4. controller creates the model Introductions (which contains list of all introductory threads) and passes it to a view for a user to see 
+```
+
+So from this example we can conclude that the core part of the framework consists of 4 parts (router, controller, model and view) so let's create them. Oh yeah, we will need two more files; one that contains a list of routes and another, let's call it config file, to store defaults.  
+Now lets add something to the `public/` folder so we could actually see something when we test it. Actually let's structure it as well so we will have an easier time customizing it later. After all that our structure should look like this:
+
+```
+root/
+	index.php
+	application/
+		config/
+			config.php
+			routes.php
+		core/
+			Controller.php
+			Model.php
+			Router.php
+			View.php
+	public/
+		components/
+		errors/
+			404.php
+			500.php
+		layouts/
+			default.php
+		views/
+``` 
+
+Now we are finally ready to do some coding.

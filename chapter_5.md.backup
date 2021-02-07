@@ -1,0 +1,750 @@
+# Chapter 5 - Basic security
+
+I have told you before that this framework will not be of a production grade quality, but that does not mean we should leave the security holes wide open. In this chapter we will make three new classes that will hopefully make this framework more secure. And first class we'll be covering is request helper. So create a new folder "helpers" in our `/application/` directory and put in it a new file "Request.php".
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+class Request 
+{
+
+}
+
+```
+
+This class will consist of three parts. First is gonna be so called checkers part that we can use to get informations about the request so let's add those methods in our Request.php file.
+
+```php
+//returns protocol used for by the request
+public static function protocol() {
+    $secure = (self::server('HTTP_HOST') && self::server('HTTPS') && strtolower(self::server('HTTPS')) !== 'off');
+
+    return $secure ? 'https' : 'http';
+}
+
+//check if the request is sent via ajax function
+public static function isAjax() {
+    return (self::server('HTTP_X_REQUESTED_WITH') && strtolower(self::server('HTTP_X_REQUESTED_WITH')) === 'xmlhttprequest');
+}
+
+//determains which method is used to send a request
+public static function method($upper = true) {
+    $method = self::server('REQUEST_METHOD');
+
+    return $upper ? strtoupper($method) : strtolower($method);
+}
+
+//and finally we can check the referer header if we need to
+public static function referrer($default = null) {
+    $referrer = self::server('HTTP_REFERER', $default);
+
+    if ($referrer === null && $default !== null) {
+        $referrer = $default;
+    }
+
+    return $referrer;
+}
+```
+
+Now those methods are just used to check something, they don't actually parse the request. To do so we first need to sanatize it, so let's also add the function that will do just that.
+
+```php
+public static function xssClean($str = '') {
+    // No data? We're done here
+    if (is_string($str) && trim($str) === '') {
+        return $str;
+    }
+
+    // Recursive sanitize if this is an array
+    if (is_array($str)) {
+        foreach ($str as $key => $value) {
+            $str[$key] = self::xssClean($value);
+        }
+
+        return $str;
+    }
+
+    $str = str_replace(array(
+        '&amp;',
+        '&lt;',
+        '&gt;'
+    ), array(
+        '&amp;amp;',
+        '&amp;lt;',
+        '&amp;gt;'
+    ), $str);
+
+    // Fix &entitiy\n;
+    $str = preg_replace('#(&\#*\w+)[\x00-\x20]+;#u', '$1;', $str);
+    $str = preg_replace('#(&\#x*)([0-9A-F]+);*#iu', '$1$2;', $str);
+    $str = html_entity_decode($str, ENT_COMPAT, 'UTF-8');
+
+    // remove any attribute starting with "on" or xmlns
+    $str = preg_replace('#(<[^>]+[\x00-\x20\"\'\/])(on|xmlns)[^>]*>#iUu', '$1>', $str);
+
+    // remove javascript
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\"]*)[\x00-\x20\/]*j[\x00-\x20]*a[\x00-\x20]*v[\x00-\x20]*a[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iUu', '$1=$2nojavascript...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\"]*)[\x00-\x20\/]*v[\x00-\x20]*b[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iUu', '$1=$2novbscript...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\"]*)[\x00-\x20\/]*-moz-binding[\x00-\x20]*:#Uu', '$1=$2nomozbinding...', $str);
+    $str = preg_replace('#([a-z]*)[\x00-\x20\/]*=[\x00-\x20\/]*([\`\'\"]*)[\x00-\x20\/]*data[\x00-\x20]*:#Uu', '$1=$2nodata...', $str);
+
+    // Remove any style attributes, IE allows too much stupid things in them
+    $str = preg_replace('#(<[^>]+[\x00-\x20\"\'\/])style[^>]*>#iUu', '$1>', $str);
+
+    // Remove namespaced elements
+    $str = preg_replace('#</*\w+:\w[^>]*>#i', '', $str);
+
+    // Remove really unwanted tags
+    do {
+        $oldstring = $str;
+        $str = preg_replace('#</*(applet|meta|xml|blink|link|style|script|embed|object|iframe|frame|frameset|ilayer|layer|bgsound|title|base)[^>]*>#i', '', $str);
+    }
+    while ($oldstring !== $str);
+
+    return $str;
+}
+``` 
+
+Now every time we need to get data from the request we'll need to run it through xssClean function, but doing so is easy to forget so lets add some wrapper methods to help us with that.
+
+```php
+//check if something exists in request payload
+private static function _findFromArray($array = array(), $item = '', $default = null, $xss_clean = true) {
+    if (empty($array)) {
+        return $default;
+    }
+
+    if ( ! $item) {
+        $arr = array();
+        foreach (array_keys($array) as $key) {
+            $arr[$key] = self::_fetchFromArray($array, $key, $default, $xss_clean);
+        }
+        return $arr;
+    }
+
+    return self::_fetchFromArray($array, $item, $default, $xss_clean);
+}
+
+//if it exists, fetch it
+private static function _fetchFromArray($array, $item = '', $default = null, $xss_clean = true) {
+    if ( ! isset($array[$item])) {
+        return $default;
+    }
+
+    if ($xss_clean) {
+        return self::xssClean($array[$item]);
+    }
+
+    return $array[$item];
+}
+```
+
+Now we have wrappers that will make sure we always sanatize request payload before we use them. But it looks ugly and it's not really intuitive, so let's also add the layer of abstraction over it so when we use it we know, on glance, what it's used for.
+
+```php
+public static function server($index = '', $default = null) {
+    return self::_findFromArray($_SERVER, $index, $default, false);
+}
+
+public static function get($item = null, $default = null, $xss_clean = true) {
+    return self::_findFromArray($_GET, $item, $default, $xss_clean);
+}
+
+public static function post($item = null, $default = null, $xss_clean = true) {
+    return self::_findFromArray($_POST, $item, $default, $xss_clean);
+}
+
+public static function request($item = null, $default = null, $xss_clean = true) {
+    $request = array_merge($_GET, $_POST);
+
+    return self::_findFromArray($request, $item, $default, $xss_clean);
+}
+
+public static function file($item = null, $default = null) {
+    // If a file field was submitted without a file selected, this may still return a value.
+    // It is best to use this method along with Input::hasFile()
+    return self::_findFromArray($_FILES, $item, $default, false);
+}
+``` 
+
+We can do an even higher level of abstraction if we want. In fact, let's do it, just to make things easier for us later on.
+
+```php
+public static function inGet($item = null) {
+    return self::get($item, null, false) !== null;
+}
+
+public static function inPost($item = null) {
+    return self::post($item, null, false) !== null;
+}
+
+public static function inRequest($item = null) {
+    return self::request($item, null, false) !== null;
+}
+
+public static function inFile($item = null) {
+    return self::file($item) !== null;
+}
+
+public static function hasFile($item = null) {
+    $file = self::file($item);
+
+    return ($file !== null && $file['tmp_name'] !== '');
+}
+```
+
+And that is it for the request helper. Now we can patch some earlier vulnerabilities. Edit the file `/application/core/Router.php` like this:
+
+```php
+<?php
+
+namespace application\core;
+
+use View;
+use application\helpers\Request;
+
+class Router 
+{
+
+    protected $routes = [];
+    protected $params = [];
+    
+    public function __construct() 
+    {
+        $arr = require 'application/config/routes.php';
+        foreach ($arr as $key => $val) {
+            $this->add($key, $val);
+        }
+    }
+
+    public function add($route, $params) 
+    {
+        $route = parse_url($route, PHP_URL_PATH);
+        $route = '#^'.$route.'$#';
+        $this->routes[$route] = $params;
+    }
+
+    public function match() 
+    {
+        $url = parse_url(trim(Request::server('REQUEST_URI'), ROOT_URI_PATH), PHP_URL_PATH);
+
+        foreach ($this->routes as $route => $params) {
+            if (preg_match($route, $url, $matches)) {
+                $this->params = $params;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function run()
+    {
+        if ($this->match()) {
+            $path = 'application\controllers\\'.ucfirst($this->params['controller']).'Controller';
+            if (class_exists($path)) {
+                $action = $this->params['action'].'Action';
+                if (method_exists($path, $action)) {
+                    $controller = new $path($this->params);
+                    $controller->$action();
+                } else {
+                    View::errorCode(500);
+                }
+            } else {
+                View::errorCode(400);
+            }
+        } else {
+            View::errorCode(404);
+        }
+    }
+
+}
+```
+
+We can also put the `use application\helpers\Request;` in the `/application/core/Model.php` so it look like this:
+
+```php
+<?php
+
+namespace application\core;
+
+
+use application\helpers\Request;
+
+abstract class Model 
+{	
+
+}
+```
+
+The next file we are going to make will be focused on protection against csrf attacks so create a file `/application/helpers/CSRF.php`
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+use Request;
+
+class CSRF
+{
+    public static $name = '_CSRF';
+
+    public function __construct()
+    {
+        session_start(); //later we will need to make sessions a bit more secure also
+    }
+
+    public function insert($form = 'default')
+    {
+        echo '<input type="hidden" name="csrf_token" value="' . $this->generate($form) . '">';
+    }
+
+
+    public function generate($form = NULL)
+    {
+        $token = self::token() . self::fingerprint();
+        $_SESSION[self::$name . '_' . $form] = $token;
+        return $token;
+    }
+
+    public function check($token, $form = NULL)
+    {
+         if( isset($_SESSION[self::$name . '_' . $form]) && $_SESSION[self::$name . '_' . $form] == $token){ //token OK
+            return (substr($token, -32) === self::fingerprint()); // fingerprint OK?
+        }
+        return FALSE;
+    }
+
+    protected static function token()
+    {
+        mt_srand((double) microtime() * 10000);
+        $charid = strtoupper(md5(uniqid(rand(), TRUE)));
+        return substr($charid, 0, 8) .
+               substr($charid, 8, 4) .
+               substr($charid, 12, 4) .
+               substr($charid, 16, 4) .
+               substr($charid, 20, 12);
+    }
+
+    protected static function fingerprint()
+    {
+        return strtoupper(md5(implode('|', array(Request::server('REMOTE_ADDR'), Request::server('HTTP_USER_AGENT')))));
+    }
+}
+``` 
+
+That was a relatively simple class, what it does is basicly generating and checking the csrf token when forms are sent. Let's add that to our view core class so that it always has csrf token ready if we need to create form in the future. Edit the `/application/core/View.php`
+
+```php
+<?php
+
+namespace application\core;
+
+
+use application\helpers\CSRF;
+
+class View 
+{
+
+	public $path;
+	public $route;
+	public $layout;
+
+	public function __construct($route, $layout=LAYOUT) 
+	{
+		$this->route = $route;
+		$this->layout = $layout;
+		$this->path = $route['controller'].'/'.$route['action'];
+	}
+
+	public function render($vars = []) 
+	{
+		$csrf = new CSRF(); // create a new csrf object so we can use it to generate tokens on the fly
+		extract($vars);
+		$path = VIEW_PATH . $this->path. '.php';
+		if (file_exists($path)) {
+			ob_start();
+			require $path;
+			$content = ob_get_clean();
+			require PUBLIC_PATH . '/layouts/'.$this->layout.'.php';
+		}
+	}
+
+	public static function errorCode($code) 
+	{
+		http_response_code($code);
+		$path = PUBLIC_PATH . '/errors/'.$code.'.php';
+		if (file_exists($path)) {
+			require $path;
+		}
+		exit;
+	}
+
+    public function redirect($url)
+    {
+        header('location: '.$url);
+        exit;
+    }
+}	
+```
+
+And with that we are done with csrf helper class. The last class we are going to make in this chapter is a validation helper class. So create yet another in `/application/helpers/` and name it Validation.php. This will be a relativly long file, but all it holds is a list of definitions for the rules we are going to use when we get to validate user input. It is worth noting that is not a be all end all list of validators, if you think your app will need some additional definitions then by all means add them. But for the course of this tutorial theese should be enough. 
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+class Validation {
+
+	public static function checkLength($value, $maxLength, $minLength = 0) 
+	{
+		if (!(strlen($value) > $maxLength) && !(strlen($value) < $minLength)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function compare($value1, $value2, $caseSensitive = false) 
+	{
+		if ($caseSensitive) {
+			return ($value1 == $value2 ? true : false);
+		} else {
+			if (strtoupper($value1) == strtoupper($value2)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	public static function contains($string, $find, $caseSensitive = true) 
+	{
+		if (strlen($find) == 0) {
+			return true;
+		} else {
+			if ($caseSensitive) {
+				return (strpos($string, $find) !== false);
+			} else {
+				return (strpos(strtoupper($string), strtoupper($find)) !== false);
+			}
+		}
+	}
+
+	public static function convertToDate($date, $timezone = TIMEZONE, $forceFixDate = true) 
+	{
+		if ($date instanceof DateTime) {
+			return $date;
+		} else {
+			date_default_timezone_set($timezone);
+
+			$timestamp = strtotime($date);
+
+			if ($timestamp) {
+				$date = DateTime::createFromFormat('U', $timestamp);
+			} else {
+				$date = false;
+			}
+
+			return $date;
+		}
+	}
+
+	public static function getAge($dob, $timezone = TIMEZONE) 
+	{
+		$date     = self::convertToDate($dob, $timezone);
+		$now      = new DateTime();
+		$interval = $now->diff($date);
+		return $interval->y;
+	}
+
+	public static function getDefaultOnEmpty($value, $default) 
+	{
+		if (self::hasValue($value)) {
+			return $value;
+		} else {
+			return $default;
+		}
+	}
+
+	public static function hasArrayKeys($array, $required_keys, $keys_case = false) 
+	{
+		$valid = true;
+		if (!is_array($array)) {
+			$valid = false;
+		} else {
+			foreach ($required_keys as $key) {
+				if ($keys_case == CASE_UPPER) {
+					if (!array_key_exists(strtoupper($key), $array)) {
+						$valid = false;
+					}
+				} elseif ($keys_case == CASE_LOWER) {
+					if (!array_key_exists(strtolower($key), $array)) {
+						$valid = false;
+					}
+				} else {
+					if (!array_key_exists($key, $array)) {
+						$valid = false;
+					}
+				}
+			}
+		}
+		return $valid;
+	}
+
+	public static function hasValue($value) 
+	{
+		return !(self::isEmpty($value));
+	}
+
+	public static function isOfAge($age, $legal = 18) 
+	{
+		return self::getAge($age) < $legal ? false : true;
+	}
+
+	public static function isAlpha($value, $allow = '') 
+	{
+		if (preg_match('/^[a-zA-Z' . $allow . ']+$/', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isAlphaNumeric($value) 
+	{
+		if (preg_match('/^[A-Za-z0-9 ]+$/', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isEmail($email) 
+	{
+		$pattern = '/^([a-zA-Z0-9])+([\.a-zA-Z0-9_-])*@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-]+)+/';
+
+		if (preg_match($pattern, $email)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isEmpty($value) 
+	{
+		if (!isset($value)) {
+			return true;
+		} elseif (is_null($value)) {
+			return true;
+		} elseif (is_string($value) && strlen($value) == 0) {
+			return true;
+		} elseif (is_array($value) && count($value) == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isFloat($number) 
+	{
+		if (is_float($number)) {
+			return true;
+		} else {
+			$pattern = '/^[-+]?(((\\\\d+)\\\\.?(\\\\d+)?)|\\\\.\\\\d+)([eE]?[+-]?\\\\d+)?$/';
+    		return (!is_bool($number) &&
+				(is_float($number) || preg_match($pattern, trim($number))));
+		}
+	}
+
+	public static function isInternetURL($value) 
+	{
+		if (preg_match('/^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?$/i', $value)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isNumber($number) 
+	{
+		if (preg_match('/^\-?\+?[0-9e1-9]+$/', $number)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isTooLong($value, $maximumLength) 
+	{
+		if (strlen($value) > $maximumLength) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isTooShort($value, $minimumLength) 
+	{
+		if (strlen($value) < $minimumLength) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static function isValidCreditCardNumber($cardnumber) 
+	{
+		$number    = preg_replace('/[^0-9]/i', '', $cardnumber);
+		$length    = strlen($number);
+		$revNumber = strrev($number);
+
+		// calculate checksum
+		$sum       = '';
+		for ($i = 0; $i < $length; $i++) {
+			$sum .= $i & 1 ? $revNumber[$i] * 2 : $revNumber[$i];
+		}
+
+		return array_sum(str_split($sum)) % 10 === 0;
+	}
+
+	public static function isValidJSON($string) 
+	{
+		@json_decode($string);
+		return (json_last_error() == JSON_ERROR_NONE);
+	}
+
+	public static function sanitize($input) 
+	{
+		$search = array(
+			'@<script[^>]*?>.*?</script>@si',   // Strip out javascript
+			'@<[\/\!]*?[^<>]*?>@si',            // Strip out HTML tags
+			'@<style[^>]*?>.*?</style>@siU',    // Strip style tags properly
+			'@<![\s\S]*?--[ \t\n\r]*>@'         // Strip multi-line comments
+		);
+		return preg_replace($search, '', $input);
+	}
+
+	public static function stripExcessWhitespace($string) 
+	{
+		return preg_replace('/  +/', ' ', $string);
+	}
+
+	public static function stripNonAlpha($string) 
+	{
+		return preg_replace('/[^a-z]/i', '', $string);
+	}
+
+	public static function stripNonAlphaHyphenSpaces($string) 
+	{
+		return preg_replace('/[^a-z\- ]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumeric($string) 
+	{
+		return preg_replace('/[^a-z0-9]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumericHyphenSpaces($string) 
+	{
+		return preg_replace('/[^a-z0-9\- ]/i', '', $string);
+	}
+
+	public static function stripNonAlphaNumericSpaces($string) 
+	{
+		return preg_replace('/[^a-z0-9 ]/i', '', $string);
+	}
+
+	public static function stripNonNumeric($string) 
+	{
+		return preg_replace('/[^0-9]/', '', $string);
+	}
+
+	public static function trim($value, $mask = ' ') 
+	{
+		if (is_string($value)) {
+			return trim($value, $mask);
+		} elseif (is_null($value)) {
+			return '';
+		} else {
+			return $value;
+		}
+	}
+
+	public static function truncate($string, $length, $dots = '') 
+	{
+		if (strlen($string) > $length) {
+			return substr($string, 0, $length - strlen($dots)) . $dots;
+		} else {
+			return $string;
+		}
+	}
+
+	public static function truncateDecimal($float, $precision = 0) 
+	{
+		$pow     = pow(10, $precision);
+		$precise = (int) ($float * $pow);
+		return (float) ($precise / $pow);
+	}
+}
+``` 
+
+We could also use some abstraction if the data we are going to validate needs to pass multiple checks. For example if we are going to validate password we could also add this:
+
+```php
+public static function validatePassword($password, $confirm, $email = '', $username = '', $forceUpperLower = false) 
+{
+
+	$problem = '';
+
+	if ($password != $confirm) {
+		$problem .= 'Password and confirm password fields did not match.' . "<br>\n";
+	}
+	if (strlen($password) < 8) {
+		$problem .= 'Password must be at least 8 characters long.' . "<br>\n";
+	}
+	if ($email) {
+		if (strpos(strtoupper($password), strtoupper($email)) !== false
+			|| strpos(strtoupper($password), strtoupper(strrev($email))) !== false) {
+			$problem .= 'Password cannot contain the email address.' . "<br>\n";
+		}
+	}
+	if ($username) {
+		if (strpos(strtoupper($password), strtoupper($username)) !== false
+			|| strpos(strtoupper($password), strtoupper(strrev($username))) !== false) {
+			$problem .= 'Password cannot contain the username (or reversed username).' . "<br>\n";
+		}
+	}
+	if (!preg_match('#[0-9]+#', $password)) {
+		$problem .= 'Password must contain at least one number.' . "<br>\n";
+	}
+	if ($forceUpperLower) {
+		if (!preg_match('#[a-z]+#', $password)) {
+			$problem .= 'Password must contain at least one lowercase letter.' . "<br>\n";
+		}
+		if (!preg_match('#[A-Z]+#', $password)) {
+			$problem .= 'Password must contain at least one uppercase letter.' . "<br>\n";
+		}
+	} else {
+		if (!preg_match('#[a-zA-Z]+#', $password)) {
+			$problem .= 'Password must contain at least one letter.' . "<br>\n";
+		}
+	}
+
+	if (strlen($problem) == 0) {
+		$problem = false;
+	} else ($returnArray) {
+		$problem = explode("<br>\n", trim($problem, "<br>\n"));
+	}
+
+	return $problem;
+}
+```
+
+And that is all for this chapter. Soon we will integrate database support and so we can start create some more interesting examples, but before that we will need to design our error handler, because we really don't want errors anywhare near database blocks. So that is what the next part will be about.
