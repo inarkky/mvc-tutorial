@@ -1,1 +1,465 @@
 # Chapter 9 - File handling
+
+If you had ever code forms for file uploads you probably know how unintuitive native file handling in php is. But, whether you want it or not, it's one of the essential features of every web app, so we will try to make the process of manipulating files as easy as possible.  
+First, let's create new helper named "File.php".
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+class File 
+{
+	//initialize varibles we'll need 
+    public $the_file;
+    public $the_temp_file;
+    public $validate_mime = true; 
+    public $upload_dir;
+    public $replace;
+    public $do_filename_check;
+    public $max_length_filename = 100;
+    public $extensions;
+    public $valid_mime_types = [
+        '.bmp'  => 'image/bmp', 
+        '.gif'  => 'image/gif', 
+        '.jpg'  => 'image/jpeg', 
+        '.jpeg' => 'image/jpeg', 
+        '.pdf'  => 'application/pdf', 
+        '.png'  => 'image/png', 
+        '.zip'  => 'application/zip'
+    ]; 
+    public $ext_string;
+    public $http_error;
+    public $rename_file;
+    public $file_copy; 
+    public $message = [];
+    public $create_directory = true;
+
+	//set default permissions
+    protected $fileperm = 0644;
+    protected $dirperm = 0755;
+
+	protected function error_text($err_num) 
+	{
+	    // externalize messages
+	    $error[0] = 'File: <b>'.$this->the_file.'</b> successfully uploaded!';
+	    $error[1] = 'The uploaded file exceeds the max. upload filesize directive in the server configuration.';
+	    $error[2] = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the html form.';
+	    $error[3] = 'The uploaded file was only partially uploaded';
+	    $error[4] = 'No file was uploaded';
+	    $error[6] = 'Missing a temporary folder. ';
+	    $error[7] = 'Failed to write file to disk. ';
+	    $error[8] = 'A PHP extension stopped the file upload. ';
+	    // end  http errors
+	    $error[10] = 'Please select a file for upload.';
+	    $error[11] = 'Only files with the following extensions are allowed: <b>'.$this->ext_string.'</b>';
+	    $error[12] = 'Sorry, the filename contains invalid characters. Use only alphanumerical chars and separate parts of the name (if needed) with an underscore. <br>A valid filename ends with one dot followed by the extension.';
+	    $error[13] = 'The filename exceeds the maximum length of '.$this->max_length_filename.' characters.';
+	    $error[14] = 'Sorry, the upload directory does not exist!';
+	    $error[15] = 'Uploading <b>'.$this->the_file.'...Error!</b> Sorry, a file with this name already exitst.';
+	    $error[16] = 'The uploaded file is renamed to <b>'.$this->file_copy.'</b>.';
+	    $error[17] = 'The file %s does not exist.';
+	    $error[18] = 'The file type (MIME type) is not valid.'; 
+	    $error[19] = 'The MIME type check is enabled, but is not supported.'; 
+	    
+	    return $error[$err_num];
+	}
+
+	public function file_upload() 
+    {
+        $this->rename_file = false;
+        $this->ext_string = '';
+    } 
+    
+    public function show_error_string($br = '<br />') 
+    {
+        $msg_string = '';
+        foreach ($this->message as $value) {
+            $msg_string .= $value.$br;
+        }
+        return $msg_string;
+    }
+}
+```
+
+First, let's add some basic functions to make our life easier later
+
+```php
+public function get_extension($from_file) 
+{
+    $ext = strtolower(strrchr($from_file,'.'));
+    return $ext;
+}
+
+public function show_extensions() 
+{
+    $this->ext_string = implode(' ', $this->extensions);
+}
+
+public function set_file_name($new_name = '') 
+{ 
+    if ($this->rename_file) {
+        if ($this->the_file == '') return;
+        $name = ($new_name == '') ? strtotime('now') : $new_name;
+        sleep(3);
+        $name = $name.$this->get_extension($this->the_file);
+    } else {
+        $name = str_replace(' ', '_', $this->the_file);
+    }
+    return $name;
+}
+```
+
+We will also need something that will check the existence of the file
+
+```php
+public function check_dir($directory) 
+{
+    if (!is_dir($directory)) {
+        if ($this->create_directory) {
+            umask(0);
+            mkdir($directory, $this->dirperm);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return true;
+    }
+}
+
+public function existing_file($file_name) 
+{
+    if ($this->replace == 'y') {
+        return true;
+    } else {
+        if (file_exists($this->upload_dir.$file_name)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+public function move_upload($tmp_file, $new_file) 
+{
+    if ($this->existing_file($new_file)) {
+        $newfile = $this->upload_dir.$new_file;
+        if ($this->check_dir($this->upload_dir)) {
+            if (move_uploaded_file($tmp_file, $newfile)) {
+                umask(0);
+                chmod($newfile , $this->fileperm);
+                return true;
+            } else {
+                $this->message[] = $this->error_text(7); 
+                return false;
+            }
+        } else {
+            $this->message[] = $this->error_text(14);
+            return false;
+        }
+    } else {
+        $this->message[] = $this->error_text(15);
+        return false;
+    }
+}
+```
+
+When we establish that, we might also need to inspect the file to see what are we working with.
+
+```php
+public function get_mime_type($file) 
+{
+    $mtype = false;
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mtype = finfo_file($finfo, $file);
+        finfo_close($finfo);
+    } elseif (function_exists('mime_content_type')) {
+        $mtype = mime_content_type($file);
+    } 
+    return $mtype;
+}
+    
+public function get_uploaded_file_info($name) 
+{
+    $str = 'File name: '.basename($name).PHP_EOL;
+    $str .= 'File size: '.filesize($name).' bytes'.PHP_EOL;
+    if ($mimetype = get_mime_type($name)) {
+        $str .= 'Mime type: '.$mimetype.PHP_EOL;
+    }
+    if ($img_dim = getimagesize($name)) {
+        $str .= 'Image dimensions: x = '.$img_dim[0].'px, y = '.$img_dim[1].'px'.PHP_EOL;
+    }
+    return $str;
+}
+```
+
+Now we can code our validators
+
+```php
+public function validateMimeType($mime_type) 
+{
+    $ext = $this->get_extension($this->the_file);
+    if ($mime_type == $this->valid_mime_types[$ext]) {
+        return true;
+    } else {
+        $this->message[] = $this->error_text(18);
+        return false;
+    }
+}
+
+public function validateExtension() 
+{
+    $extension = $this->get_extension($this->the_file);
+    $ext_array = $this->extensions;
+    if (in_array($extension, $ext_array)) {
+        if ($this->validate_mime) {
+            if ($mime_type = $this->get_mime_type($this->the_temp_file)) {
+                if ($this->validateMimeType($mime_type)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                $this->message[] = $this->error_text(18);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
+
+public function check_file_name($the_name) 
+{
+    if ($the_name != '') {
+        if (strlen($the_name) > $this->max_length_filename) {
+            $this->message[] = $this->error_text(13);
+            return false;
+        } else {
+            if ($this->do_filename_check == 'y') {
+                if (preg_match('/^([a-z0-9_\-]*\.?)\.[a-z0-9]{1,5}$/i', $the_name)) { 
+                    return true;
+                } else {
+                    $this->message[] = $this->error_text(12);
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    } else {
+        $this->message[] = $this->error_text(10);
+        return false;
+    }
+}
+```
+
+Now that we've checked everything we can, provided no errors show up, we can commence uploading
+
+```php
+public function upload($to_name = '') 
+{
+    if ($this->http_error > 0) {
+        $this->message[] = $this->error_text($this->http_error);
+        return false;
+    } else {
+        $new_name = $this->set_file_name($to_name);
+        if ($this->check_file_name($new_name)) {
+            if ($this->validateExtension($this->the_temp_file)) {
+                if (is_uploaded_file($this->the_temp_file)) {
+                    $this->file_copy = $new_name;
+                    if ($this->move_upload($this->the_temp_file, $this->file_copy)) {
+                        $this->message[] = $this->error_text(0);
+                        if ($this->rename_file) $this->message[] = $this->error_text(16);
+                        return true;
+                    }
+                } else {
+                    $this->message[] = $this->error_text(7); 
+                    return false;
+                }
+            } else {
+                $this->show_extensions();
+                $this->message[] = $this->error_text(11);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+}
+```
+
+We will also need a method for deleting temp files so let's make that
+
+```php
+public function del_temp_file($file)
+{
+    $delete = @unlink($file); 
+    clearstatcache();
+    if (@file_exists($file)) { 
+        $filesys = eregi_replace('/','\\',$file); 
+        $delete = @system('del $filesys');
+        clearstatcache();
+        if (@file_exists($file)) { 
+            $delete = @chmod ($file, 0644); 
+            $delete = @unlink($file); 
+            $delete = @system('del $filesys');
+        }
+    }
+}
+```
+
+With that our file handling helper is finished. But it only covers validation and upload part of the handling. Which, strictly speaking should be enough in most cases, but if we are going to upload images, it would be a good idea to cover some functionality specific to them. So create another helper "Image.php".
+
+```php
+<?php
+
+namespace application\helpers;
+
+
+use application\helpers\File;
+
+class Image extends File 
+{
+    public $x_size;
+    public $y_size;
+    public $x_max_size = 300;
+    public $y_max_size = 200;
+    public $x_max_thumb_size = 110;
+    public $y_max_thumb_size = 88;
+    public $thumb_folder;
+    public $foto_folder;
+    public $larger_dim;
+    public $larger_curr_value;
+    public $larger_dim_value;
+    public $larger_dim_thumb_value;
+    
+    private $use_image_magick = false; 
+
+}
+```
+
+Seeing that we are talking about images, we should really add some methods for checking their dimensions.
+
+```php
+public function get_img_size($file) 
+{
+    $img_size = getimagesize($file);
+    $this->x_size = $img_size[0];
+    $this->y_size = $img_size[1];
+}
+
+public function check_dimensions($filename) 
+{
+    $this->get_img_size($filename);
+    $x_check = $this->x_size - $this->x_max_size;
+    $y_check = $this->y_size - $this->y_max_size;
+
+    if ($x_check < $y_check) {
+        $this->larger_dim = "y";
+        $this->larger_curr_value = $this->y_size;
+        $this->larger_dim_value = $this->y_max_size;
+        $this->larger_dim_thumb_value = $this->y_max_thumb_size;
+    } else {
+        $this->larger_dim = "x";
+        $this->larger_curr_value = $this->x_size;
+        $this->larger_dim_value = $this->x_max_size;
+        $this->larger_dim_thumb_value = $this->x_max_thumb_size;
+    }
+}
+```
+
+With the diminesion checker coded, we can now write the method for image processing
+
+```php
+public function process_image($landscape_only = false, $create_thumb = false, $delete_tmp_file = false, $compression = 85) 
+{
+    $filename = $this->upload_dir.$this->file_copy;
+    
+    $this->check_dir($this->thumb_folder); 
+    $this->check_dir($this->foto_folder); 
+    
+    $thumb = $this->thumb_folder.$this->file_copy;
+    $foto = $this->foto_folder.$this->file_copy;
+    
+    if ($landscape_only) {
+        $this->get_img_size($filename);
+        if ($this->y_size > $this->x_size) {
+            $this->img_rotate($filename, $compression);
+        }
+    }
+
+    $this->check_dimensions($filename); 
+    
+    if ($this->larger_curr_value > $this->larger_dim_value) {
+        $this->thumbs($filename, $foto, $this->larger_dim_value, $compression);
+    } else {
+        copy($filename, $foto);
+    }
+    
+    if ($create_thumb) {
+        if ($this->larger_curr_value > $this->larger_dim_thumb_value) {
+            $this->thumbs($filename, $thumb, $this->larger_dim_thumb_value, $compression); 
+        } else {
+            copy($filename, $thumb);
+        }
+    }
+    
+    if ($delete_tmp_file) $this->del_temp_file($filename); 
+}
+```
+
+Another useful method would be a function for making a thumbnail out of images. Just in case we need to render a huge amount of images on a single page.
+
+```php
+public function thumbs($file_name_src, $file_name_dest, $target_size, $quality = 80) 
+{
+    $size = getimagesize($file_name_src);
+
+    if ($this->larger_dim == "x") {
+        $w = number_format($target_size, 0, ',', '');
+        $h = number_format(($size[1]/$size[0])*$target_size,0,',','');
+    } else {
+        $h = number_format($target_size, 0, ',', '');
+        $w = number_format(($size[0]/$size[1])*$target_size,0,',','');
+    }
+    
+    if ($this->use_image_magick) {
+        exec(sprintf("convert %s -resize %dx%d -quality %d %s", $file_name_src, $w, $h, $quality, $file_name_dest));
+    } else {
+        $dest = imagecreatetruecolor($w, $h);
+        imageantialias($dest, TRUE);
+        $src = imagecreatefromjpeg($file_name_src);
+        imagecopyresampled($dest, $src, 0, 0, 0, 0, $w, $h, $size[0], $size[1]);
+        imagejpeg($dest, $file_name_dest, $quality);
+    }
+}
+```
+
+But we can also add some less useful methods like the next one, which will rotate it.
+
+```php
+public function img_rotate($wr_file, $comp) 
+{
+    $new_x = $this->y_size;
+    $new_y = $this->x_size;
+
+    if ($this->use_image_magick) {
+        exec(sprintf("mogrify -rotate 90 -quality %d %s", $comp, $wr_file));
+    } else {
+        $src_img = imagecreatefromjpeg($wr_file);
+        $rot_img = imagerotate($src_img, 90, 0);
+        $new_img = imagecreatetruecolor($new_x, $new_y);
+        imageantialias($new_img, TRUE);
+        imagecopyresampled($new_img, $rot_img, 0, 0, 0, 0, $new_x, $new_y, $new_x, $new_y);
+        imagejpeg($new_img, $this->upload_dir.$this->file_copy, $comp);
+    }
+}
+```
+
+So, now we have a complete file handling sy
